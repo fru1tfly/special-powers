@@ -1,0 +1,235 @@
+:root {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+body {
+    margin: 0;
+    background-color: #000;
+    height: 100vh;
+}
+
+* :hover {
+    cursor: inherit;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.menu {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.dragMode {
+    cursor: grab!important;
+}
+
+.dragging {
+    cursor: grabbing!important;
+}
+
+button, .uploadLabel {
+    font-size: 14px;
+    font-weight:700;
+    background: #6e1010;
+    color: #fff;
+    border-radius: 0;
+    padding: 5px 10px;
+    border: 2px solid black;
+
+    text-align: center;
+}
+
+.action-btn {
+    background: #02864b;
+}
+
+.side-bar {
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    align-items: stretch;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+input[type="text"], select {
+    border: 2px solid black;
+    font-size: 16px;
+    border-radius: 0;
+    padding: 5px;
+    outline: none;
+}
+
+.section-label {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.section-container {
+    border: 2px solid black;
+    flex-grow: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.25rem;
+}
+
+.section-item {
+    border: 1px solid black;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.section-item-selected {
+    background-color: rgba(226, 226, 126, 0.9);
+}
+
+.section-item-title {
+    flex-grow: 1;
+    font-weight: 700;
+    padding-left: 0.5rem;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    user-select: none;
+}
+
+.editor-modal {
+    position: fixed;
+    width: 50vw;
+    height: 60vh;
+    top: 20vh;
+    left: 25vw;
+
+    border: 2px solid black;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-title {
+    font-size: 20px;
+}
+
+.modal-body {
+    flex-grow: 1;
+
+}
+
+.modal-section {
+    flex-grow: 1;
+    flex-basis: 50%;
+
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.modal-field-label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.modal-field {
+    flex-basis: calc(50% - 0.75rem);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.form-image-container {
+    flex-shrink: 0;
+    max-height: 20vh;
+    display: flex;
+    justify-content: center;
+}
+
+.form-image {
+    object-fit: cover;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.multi-image-container {
+    overflow-x: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 1rem;
+}
+
+.modal-footer-button {
+    flex-grow: 1;
+}
+
+.help-text {
+    position: fixed;
+    width: 40vw;
+    bottom: 5vh;
+    left: 30vw;
+
+    border: 2px solid black;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    font-size: 18px;
+    gap: 2rem;
+}
+
+.help-text-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.instruction-text {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.key-control {
+    background-color: #C1668E;
+    border: 2px solid #7C425B;
+    padding: 0.5rem 1rem 1rem 0.5rem;
+    border-radius: 10px;
+    border-bottom-width: 5px;;
+    font-size: 14px;
+}
