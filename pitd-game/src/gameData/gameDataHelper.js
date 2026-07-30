@@ -11,8 +11,9 @@ export function getRoom(rooms, roomId) {
 export function loadRoomAssets(room) {
     const assetPromises = [];
 
+	if (room.imgUrl) {
     assetPromises.push(addImage(room.imgUrl));
-
+	}
     for (const i of room.interactables) {
         for (const asset of i.assets) {
             assetPromises.push(addImage(asset));

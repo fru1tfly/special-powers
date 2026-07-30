@@ -6,7 +6,7 @@ import GameManager from './game/GameManager'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="specialpowers">
       <Routes>
         <Route path="/" element={<GameManager />} />
         <Route path="/editor" element={<Editor />} />

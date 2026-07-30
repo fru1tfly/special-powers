@@ -8,6 +8,11 @@ import fs from 'fs';
 import { upload } from '../middlewares/upload.js';
 import dotenv from 'dotenv';
 
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 
@@ -69,5 +74,12 @@ fileRouter.get(
 
 app.use('/api/file', fileRouter);
 app.use(express.static(process.env.PUBLIC_FOLDER));
+app.use(express.static(path.join(__dirname, process.env.BUILD_PATH)));
 
-server.listen(5000);
+
+app.get(/(.*)/, (req, res) => {
+	console.log(process.env.BUILD_PATH)
+	res.sendFile(path.join(__dirname, `${process.env.BUILD_PATH}/index.html`));
+});
+
+server.listen(6000);

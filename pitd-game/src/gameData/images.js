@@ -3,11 +3,15 @@ const IMAGES = {};
 export const addImage = (url) => {
     return new Promise((resolve, reject) => {
         const img = new Image();
-        img.src = `${import.meta.env.VITE_DOMAIN}${url}`;
+	    console.log(url);
+ 	console.log('trying to load image');
+	    img.src = `${import.meta.env.VITE_DOMAIN}${url}`;
         img.onload = () => {
             resolve(img);
         };
         img.onerror = reject;
+
+	    console.log('after error');
 
         IMAGES[url] = {};
 
