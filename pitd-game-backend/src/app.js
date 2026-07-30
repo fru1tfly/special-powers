@@ -82,4 +82,4 @@ app.get(/(.*)/, (req, res) => {
 	res.sendFile(path.join(__dirname, `${process.env.BUILD_PATH}/index.html`));
 });
 
-server.listen(6000);
+server.listen(6002);
