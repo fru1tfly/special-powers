@@ -134,9 +134,7 @@ export default function EditorCanvas() {
         }
 
         if (imgSrc) {
- 
-		console.log('trying to get room background');
-	roomBackground = new Image();
+	        roomBackground = new Image();
             roomBackground.src = `${import.meta.env.VITE_DOMAIN}${imgSrc}`;
             roomBackground.onload = () => {
                 sizeImage();

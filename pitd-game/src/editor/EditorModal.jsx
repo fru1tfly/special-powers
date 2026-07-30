@@ -164,7 +164,6 @@ export default function EditorModal() {
     }
 
     const startWorldEdit = () => {
-        console.log(selectedInteractable.objectType);
         if (selectedInteractable.objectType !== 'Key') {
             updateInteractable({
                 ...selectedInteractable,
@@ -225,7 +224,7 @@ export default function EditorModal() {
     return shapeMode ? (
         <div className="help-text">
             <div className="help-text-item">
-                <span className="control-icon"><img src="/mouse.png" /></span>
+                <span className="control-icon"><img src={`${import.meta.env.BASE_URL}/mouse.png`}/></span>
                 <span className="instruction-text">Place New Vertex</span>
             </div>
             <div className="help-text-item">
@@ -241,7 +240,7 @@ export default function EditorModal() {
     ) : moveMode ? (
         <div className="help-text">
             <div className="help-text-item">
-                <span className="control-icon"><img src="/mouse.png" /></span>
+                <span className="control-icon"><img src={`${import.meta.env.BASE_URL}/mouse.png`}/></span>
                 <span className="instruction-text">Move Item</span>
             </div>
             <div className="help-text-item">

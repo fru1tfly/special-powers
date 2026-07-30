@@ -70,7 +70,7 @@ export default function Editor() {
                             ( 
                                 <div className="help-text">
                                     <div className="help-text-item">
-                                        <span className="control-icon"><img src="/scroll.png" /></span>
+                                        <span className="control-icon"><img src={`${import.meta.env.BASE_URL}/scroll.png`} /></span>
                                         <span className="instruction-text">Scroll to Zoom</span>
                                     </div>
                                     <div className="help-text-item">
