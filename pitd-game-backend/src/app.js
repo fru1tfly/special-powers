@@ -21,7 +21,9 @@ let gameData;
 const app = express();
 const server = http.createServer(app);
 app.use(cors());
-app.use(express.json());
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 const fileRouter = Router();
 fileRouter.post(
@@ -72,13 +74,12 @@ fileRouter.get(
     }
 )
 
-app.use('/api/file', fileRouter);
+app.use(`/api/file`, fileRouter);
 app.use(express.static(process.env.PUBLIC_FOLDER));
 app.use(express.static(path.join(__dirname, process.env.BUILD_PATH)));
 
 
 app.get(/(.*)/, (req, res) => {
-	console.log(process.env.BUILD_PATH)
 	res.sendFile(path.join(__dirname, `${process.env.BUILD_PATH}/index.html`));
 });
 
