@@ -1,21 +1,26 @@
 import { useEffect, useState } from "react";
-import { gameData } from "../gameData/gameData";
 import GameCanvas from "./GameCanvas";
 import { GameContext, SetGameContext } from "./GameContext";
 import GameInputHandler from "./GameInputHandler";
 import { loadRoomAssets } from "../gameData/gameDataHelper";
+import { useGetGameData } from "../hooks/GameDataHelper";
 
 export default function GameManager() {
     const [loaded, setLoaded] = useState(false);
-    const [gameState, setGameState] = useState({
-        room: gameData[0].id,
-        inventory: [],
-        alerts: []
-    });
+    const [gameState, setGameState] = useState({});
+    const getGameData = useGetGameData();
 
     useEffect(() => {
         const init = async () => {
-            await Promise.all(gameData.flatMap(room => loadRoomAssets(room)));
+            const gameData = (await getGameData()).data;
+            await Promise.all(gameData.rooms.flatMap(room => loadRoomAssets(room)));
+
+            setGameState({
+                ...gameData,
+                room: gameData.rooms[0].id,
+                inventory: []
+            });
+            
             setLoaded(true);
         }
 
@@ -25,6 +30,15 @@ export default function GameManager() {
         }
 
     }, []);
+
+    const saveGameState = () => {
+        const { rooms, version, room } = gameState;
+        localStorage.setItem('gameState', JSON.stringify({
+            rooms: rooms,
+            version: version,
+            room: room
+        }));
+    }
 
     return (
         <>

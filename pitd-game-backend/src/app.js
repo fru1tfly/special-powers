@@ -11,9 +11,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 
+let gameData;
+
 const app = express();
 const server = http.createServer(app);
 app.use(cors());
+app.use(express.json());
 
 const fileRouter = Router();
 fileRouter.post(
@@ -26,6 +29,43 @@ fileRouter.post(
         res.status(200).json({ file: newFileUrl });
     }
 );
+
+fs.readFile(
+    process.env.GAME_DATA_FILE, 
+    (err, data) => {
+        if (err) throw err;
+        gameData = JSON.parse(data);
+    }
+);
+
+fileRouter.post(
+    '/update/game',
+    (req, res) => {
+        let newGameData = { ...req.body };
+        if (gameData['version']) {
+            newGameData.version = gameData['version'] + 1;
+        } else {
+            newGameData.version = 1;
+        }
+
+        fs.writeFile(
+            process.env.GAME_DATA_FILE, 
+            JSON.stringify(newGameData), 
+            (err) => {
+                if (err) throw err;
+                gameData = { ...newGameData };
+                res.send(200);
+            }
+        )
+    }
+)
+
+fileRouter.get(
+    '/game',
+    (req, res) => {
+        res.send(gameData);
+    }
+)
 
 app.use('/api/file', fileRouter);
 app.use(express.static(process.env.PUBLIC_FOLDER));

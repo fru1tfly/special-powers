@@ -13,7 +13,7 @@ let roomBackground;
 let openArt = null;
 let interactables = [];
 
-const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
+export const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
 
 const sizeImage = () => {
     const imgAspectRatio = roomBackground.width / roomBackground.height;
@@ -61,18 +61,27 @@ const renderLoop = (time) => {
         );
     }
 
+    ctx.save();
+    ctx.scale(imgDimensions.height, imgDimensions.height);
+
     for (const i of interactables) {
         if (showOnScreen(i)) {
             const intImage = getImage(i.assets[0]);
+
+            const scaleFactor = imgDimensions.height / window.devicePixelRatio;
+            const imgWidth = intImage.width / scaleFactor
+            const imgHeight = intImage.height / scaleFactor;
+
             ctx.drawImage(
                 intImage,
-                i.points[0].x - intImage.width / 2,
-                i.points[0].y - intImage.height / 2,
-                intImage.width,
-                intImage.height
+                i.points[0].x - imgWidth / 2,
+                i.points[0].y - imgHeight / 2,
+                imgWidth,
+                imgHeight
             );
         }
     }
+    ctx.restore();
 
     if (openArt) {
         openArt.draw();
@@ -128,7 +137,7 @@ export default function GameCanvas() {
     }, []);
 
     useEffect(() => {
-        const room = gameData.find(r => r.id === gameState.room);
+        const room = gameState.rooms.find(r => r.id === gameState.room);
         roomBackground = getImage(room.imgUrl);
         sizeImage();
 

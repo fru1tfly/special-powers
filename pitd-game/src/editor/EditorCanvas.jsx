@@ -11,7 +11,7 @@ let roomBackground;
 let shapes = [];
 let currentRoom;
 
-const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
+export const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
 
 const sizeImage = () => {
     const imgAspectRatio = roomBackground.width / roomBackground.height;
@@ -46,36 +46,42 @@ const renderLoop = async (time) => {
 
     ctx.save();
 
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.scale(zoomValue, zoomValue);
-    ctx.translate(cameraOffset.x, cameraOffset.y);
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(zoomValue, zoomValue);
+        ctx.translate(cameraOffset.x, cameraOffset.y);
 
-    if (roomBackground) {
-        ctx.drawImage(
-            roomBackground,
-            imgDimensions.xOffset - canvas.width / 2,
-            imgDimensions.yOffset - canvas.height / 2,
-            imgDimensions.width,
-            imgDimensions.height
-        );
-    }
-
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 5 / zoomValue;
-    ctx.beginPath();
-
-    for (let shape of shapes) {
-        await drawShape(shape);
-    }
-
-    if (tempNodes.length > 0) {
-        ctx.moveTo(tempNodes[0].x, tempNodes[0].y);
-        for (let node of tempNodes) {
-            ctx.lineTo(node.x, node.y);
+        if (roomBackground) {
+            ctx.drawImage(
+                roomBackground,
+                imgDimensions.xOffset - canvas.width / 2,
+                imgDimensions.yOffset - canvas.height / 2,
+                imgDimensions.width,
+                imgDimensions.height
+            );
         }
-        ctx.stroke();
-    }
 
+        ctx.strokeStyle = 'yellow';
+        ctx.lineWidth = 5 / zoomValue / canvas.height;
+        ctx.beginPath();
+
+        ctx.save();
+            ctx.scale(imgDimensions.height, imgDimensions.height);
+
+            for (let shape of shapes) {
+                await drawShape(shape);
+            }
+
+
+
+            if (tempNodes.length > 0) {
+                ctx.moveTo(tempNodes[0].x, tempNodes[0].y);
+                for (let node of tempNodes) {
+                    ctx.lineTo(node.x, node.y);
+                }
+                ctx.stroke();
+            }
+
+        ctx.restore();
     ctx.restore();
 
     requestAnimationFrame(renderLoop);
@@ -144,7 +150,6 @@ export default function EditorCanvas() {
             r.interactables.forEach(i => {
                 if (i.points.length > 0) {
                     shapes.push(i);
-                    console.log(shapes);
                 }
                 
             })
@@ -156,7 +161,7 @@ export default function EditorCanvas() {
     )
 }
 
-async function drawShape(shape) {
+function drawShape(shape) {
     if (shape.points.length > 1) {
         ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
 
@@ -167,19 +172,27 @@ async function drawShape(shape) {
         }
         ctx.fill();
     } else {
-        const img = await getImage(shape.assets[0]);
+        const scaleFactor = imgDimensions.height / window.devicePixelRatio;
+        const img = getImage(shape.assets[0]);
+
+        const imgWidth = img.width / scaleFactor
+        const imgHeight = img.height / scaleFactor;
 
         if (shape.id !== movingObject.id) {
             ctx.drawImage(
                 img,
-                shape.points[0].x - img.width / 2, 
-                shape.points[0].y - img.height / 2
+                shape.points[0].x - imgWidth / 2,
+                shape.points[0].y - imgHeight / 2,
+                imgWidth,
+                imgHeight
             )
         } else {
             ctx.drawImage(
                 img,
-                movingObject.newPosition.x - img.width / 2,
-                movingObject.newPosition.y - img.height / 2
+                movingObject.newPosition.x - imgWidth / 2,
+                movingObject.newPosition.y - imgHeight / 2,
+                imgWidth,
+                imgHeight
             )
         }
     }

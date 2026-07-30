@@ -5,6 +5,7 @@ import { screenToWorld } from "../gameData/gameDataHelper";
 import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
 import { tempNodes, resetTempNodes } from "../stores/tempData";
+import { imgDimensions } from "./EditorCanvas";
 
 export let cameraOffset = { x: 0, y: 0 };
 export let zoomValue = 1;
@@ -141,7 +142,7 @@ const handleMouseDown = (event) => {
     }
 
     const clickPoint = screenToWorld(event.pageX, event.pageY);
-    const worldPoint = clickPoint.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue)).times(1 / zoomValue);
+    const worldPoint = clickPoint.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue)).times(1 / zoomValue).times(1 / imgDimensions.height);
 
     if (inputState === 'placing') {
         tempNodes.push(worldPoint);
@@ -161,8 +162,8 @@ const handleMouseMove = async (event) => {
         };
 
         cameraOffset = {
-            x: cameraOrigin.x + (movement.x / zoomValue),
-            y: cameraOrigin.y + (movement.y / zoomValue)
+            x: cameraOrigin.x + (movement.x / zoomValue) * window.devicePixelRatio,
+            y: cameraOrigin.y + (movement.y / zoomValue) * window.devicePixelRatio
         };
     }
 
@@ -171,12 +172,16 @@ const handleMouseMove = async (event) => {
 
     if (stateInQueue('moving')) {
         const clickPoint = screenToWorld(mousePosition.x, mousePosition.y);
-        const worldPoint = clickPoint.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue)).times(1 / zoomValue);
+        const worldPoint = clickPoint.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue)).times(1 / zoomValue).times(1 / imgDimensions.height);
+
         if (inputState !== 'moveMode') {
-            const movingImage = await getImage(movingObject.assetUrl);
+            const movingImage = getImage(movingObject.assetUrl);
+            const imgWorldWidth = movingImage.width / imgDimensions.height;
+            const imgWorldHeight = movingImage.height / imgDimensions.height;
+
             if (
-                Math.abs(worldPoint.x - movingObject.newPosition.x) < (movingImage.width / 2) &&
-                Math.abs(worldPoint.y - movingObject.newPosition.y) < (movingImage.height / 2)
+                Math.abs(worldPoint.x - movingObject.newPosition.x) < (imgWorldWidth / 2) &&
+                Math.abs(worldPoint.y - movingObject.newPosition.y) < (imgWorldHeight / 2)
             ) {
                 addState('hovering');
             } else {

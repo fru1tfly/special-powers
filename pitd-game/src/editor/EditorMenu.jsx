@@ -3,16 +3,17 @@ import EditorSidebar from "./EditorSidebar"
 import { EditorContext, SetEditorContext } from "./EditorContext"
 import { Room, Interactable } from "../gameTypes/LevelObjects"
 import { useUploadFile } from "../hooks/files/useUploadFile"
+import { useSaveGameData } from "../hooks/GameDataHelper"
 
 export default function EditorMenu() {
 
     const editorState = useContext(EditorContext)
     const setEditorState = useContext(SetEditorContext)
     const { uploadFile } = useUploadFile();
+    const { saveGameData } = useSaveGameData();
 
     const selectedRoom = editorState.rooms.find(r => r.id === editorState.selectedRoom)
     const selectedInteractable = selectedRoom?.interactables.find(i => i.id === editorState.selectedInteractable)
-
 
     const handleAddRoom = () => {
         const newRoom = new Room()
@@ -54,23 +55,8 @@ export default function EditorMenu() {
         })
     }
 
-    const exportRoomData = () => {
-        const download = document.createElement('a');
-        const { rooms, ...remaining } = editorState;
-        download.setAttribute('href', 'data:text/plain;charset=utf-8,export const gameData = ' + JSON.stringify(rooms));
-        download.setAttribute('download', 'gameData.pitd');
-
-        download.style.display = 'none';
-        document.body.appendChild(download);
-
-        download.click();
-
-        document.body.removeChild(download);
-    }
-
-    const wipeRoomData = () => {
-        localStorage.clear();
-        window.location.reload();
+    const saveRoomData = () => {
+        saveGameData({ rooms: editorState.rooms });
     }
 
     const loadGameData = (event) => {
@@ -143,6 +129,7 @@ export default function EditorMenu() {
                     {
                         editorState.rooms.map(room => (
                             <div 
+                                key={room.id}
                                 className={
                                     room.id === selectedRoom?.id 
                                         ? 'section-item section-item-selected' 
@@ -161,12 +148,7 @@ export default function EditorMenu() {
                         ))
                     }
                 </div>
-                <div className="section-label">Zoom</div>
-                <input type="range" id="zoom" min="1" max="10" value="1" step="0.1"/>
-                <button onClick={exportRoomData}>Export Room Data</button>
-                <label htmlFor="load" className="uploadLabel">Load Room Data</label>
-                <input type="file" accept=".pitd" id="load" onChange={loadGameData} />
-                <button onClick={wipeRoomData}>Wipe Room Data</button>
+                <button onClick={saveRoomData}>Save Room Data</button>
             </EditorSidebar>
             {selectedRoom && 
                 <EditorSidebar>
@@ -183,6 +165,7 @@ export default function EditorMenu() {
                     <div className="section-container" id="shapeList">
                         {selectedRoom.interactables.map(i => (
                             <div
+                                key={i.id}
                                 className={
                                     i.id === selectedInteractable?.id 
                                         ? 'section-item section-item-selected' 

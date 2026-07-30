@@ -5,6 +5,7 @@ import { useUploadFile } from "../hooks/files/useUploadFile";
 import { startShapeMode, shapeModeSubscribe, getShapeMode, cameraOffset, startMoveMode, moveModeSubscribe, getMoveMode, on } from "./EditorInputHandler";
 import { useGetInteractable, useUpdateInteractable } from "../hooks/editor/InteractableHelper";
 import { Vector2 } from "../gameTypes/Vector";
+import { addImage } from "../gameData/images";
 
 const TYPES = [
     '--None--',
@@ -49,15 +50,6 @@ export default function EditorModal() {
         }
     }, [selectedInteractable, updateInteractable]);
 
-    const typeOptions = TYPES.map(t => { 
-        const opts = {};
-        if (selectedInteractable.objectType === t) {
-            opts['selected'] = 'selected';
-        }
-        return (<option {...opts}>{t}</option>); 
-    });
-
-   
 
     const handleNameChange = (event) => {
         updateInteractable({
@@ -139,12 +131,15 @@ export default function EditorModal() {
         const file = event.target.files[0];
         if (!file) return;
 
-        uploadFile(file, '/images/sprites').then(response => {
+        uploadFile(file, '/images/sprites').then(async response => {
             const imgUrl = response;
+
+            await addImage(imgUrl);
+
             updateInteractable({
                 ...selectedInteractable,
                 assets: [imgUrl]
-            })
+            });
         });
     }
 
@@ -257,7 +252,6 @@ export default function EditorModal() {
                 <span className="key-control">Enter</span>
                 <span className="instruction-text">Done</span>
             </div>
-            
         </div>
     ) : (
         <div className="editor-modal">
@@ -269,8 +263,10 @@ export default function EditorModal() {
                     </div>
                     <div className="modal-field">
                         <div className="modal-field-label">Type</div>
-                        <select onChange={handleTypeChange}>
-                            {typeOptions}
+                        <select onChange={handleTypeChange} value={selectedInteractable.objectType}>
+                            {TYPES.map(t => { 
+                                return (<option key={t}>{t}</option>); 
+                            })}
                         </select>
                     </div>
                     {
@@ -286,7 +282,7 @@ export default function EditorModal() {
                             }
 
                             return (
-                                <div className="modal-field">
+                                <div key={formValue} className="modal-field">
                                     <div className="modal-field-label">{def.name}</div>
                                     {def.type === 'dropdown' && (
                                         <select onChange={(event) => handleFormValueChange(formValue, event)}>

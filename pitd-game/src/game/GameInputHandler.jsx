@@ -19,7 +19,7 @@ export default function GameInputHandler() {
     
 
     useEffect(() => {
-        const interactables = getRoom(gameState.room).interactables;
+        const interactables = getRoom(gameState.rooms, gameState.room).interactables;
 
         const handleMouseMove = (event) => {
             const mousePoint = screenToWorld(event.clientX, event.clientY);

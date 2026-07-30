@@ -2,9 +2,10 @@ import { gameData } from "./gameData";
 import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
 import { addImage } from "./images";
+import { imgDimensions } from "../game/GameCanvas";
 
-export function getRoom(roomId) {
-    return gameData.find(r => r.id === roomId);
+export function getRoom(rooms, roomId) {
+    return rooms.find(r => r.id === roomId);
 }
 
 export function loadRoomAssets(room) {
@@ -24,8 +25,9 @@ export function loadRoomAssets(room) {
 export function screenToWorld(x, y) {
     const screen = new Vector2(x, y).times(window.devicePixelRatio);
     const relativeToCenter = screen.minus(new Vector2(canvasWidth / 2, canvasHeight / 2));
+    const worldScale = relativeToCenter.times(1 / imgDimensions.height);
 
-    return relativeToCenter;
+    return worldScale;
 }
 
 export function pointInShape(point, shape) {
@@ -55,9 +57,12 @@ export function pointInShape(point, shape) {
 }
 
 export function inImageBounds(point, image, origin) {
+    const scaleFactor = imgDimensions.height / window.devicePixelRatio;
+    const imgWidth = image.width / scaleFactor;
+    const imgHeight = image.height / scaleFactor;
     return (
-        Math.abs(point.x - origin.x) <= image.width / 2 &&
-        Math.abs(point.y - origin.y) <= image.height / 2
+        Math.abs(point.x - origin.x) <= imgWidth / 2 &&
+        Math.abs(point.y - origin.y) <= imgHeight / 2
     );
 }
 

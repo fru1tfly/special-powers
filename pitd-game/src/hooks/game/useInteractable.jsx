@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { GameContext, SetGameContext } from "../../game/GameContext";
-import { gameData, updateGameData } from "../../gameData/gameData";
 
 export function useInteractable() {
     const gameState = useContext(GameContext);
@@ -28,13 +27,12 @@ export function useInteractable() {
                 return true;
             }
             case 'Key': {
-                updateGameData(gameData.map(room => ({
-                    ...room,
-                    interactables: room.interactables.filter(int => int.id !== interactable.id)
-                })));
-
                 setGameState({
                     ...gameState,
+                    rooms: gameState.rooms.map(room => ({
+                        ...room,
+                        interactables: room.interactables.filter(int => int.id !== interactable.id)
+                    })),
                     inventory: [...gameState.inventory, interactable.id]
                 });
                 return true;
