@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { cursors } from "../gameData/cursors";
 import { getImage } from "../gameData/images";
-import { screenToWorld } from "../gameData/gameDataHelper";
 import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
 import { tempNodes, resetTempNodes } from "../stores/tempData";
@@ -141,9 +140,9 @@ const handleMouseDown = (event) => {
         cameraOrigin = { ...cameraOffset };
     }
 
-    const clickPoint = screenToWorld(event.pageX, event.pageY);
-    const worldPoint = clickPoint.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue)).times(1 / zoomValue).times(1 / imgDimensions.height);
+    const worldPoint = screenToWorld(event.pageX, event.pageY);
 
+	console.log(cameraOffset, zoomValue, imgDimensions);
     if (inputState === 'placing') {
         tempNodes.push(worldPoint);
     }
@@ -165,14 +164,14 @@ const handleMouseMove = async (event) => {
             x: cameraOrigin.x + (movement.x / zoomValue) * window.devicePixelRatio,
             y: cameraOrigin.y + (movement.y / zoomValue) * window.devicePixelRatio
         };
+	console.log(cameraOffset);
     }
 
     mousePosition.x = event.clientX;
     mousePosition.y = event.clientY;
 
     if (stateInQueue('moving')) {
-        const clickPoint = screenToWorld(mousePosition.x, mousePosition.y);
-        const worldPoint = clickPoint.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue)).times(1 / zoomValue).times(1 / imgDimensions.height);
+        const worldPoint = screenToWorld(mousePosition.x, mousePosition.y);
 
         if (inputState !== 'moveMode') {
             const movingImage = getImage(movingObject.assetUrl);
@@ -257,6 +256,15 @@ const handleWheel = (event) => {
         newZoomValue = 10;
     }
     zoomValue = newZoomValue;
+}
+
+const screenToWorld = (x, y) => {
+	const screen = new Vector2(x, y).times(window.devicePixelRatio);
+	const relativeToCenter = screen.minus(new Vector2(canvasWidth / 2, canvasHeight / 2));
+	const relativeToCamera = relativeToCenter.minus(new Vector2(cameraOffset.x, cameraOffset.y));
+	const zoomScale = relativeToCamera.times(1 / zoomValue).times(1 / imgDimensions.height);
+
+	return zoomScale;
 }
 
 export function EditorInputHandler() {
