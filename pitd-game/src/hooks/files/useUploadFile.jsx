@@ -8,11 +8,17 @@ export function useUploadFile() {
         setIsLoading(true);
 
         const form = new FormData();
-        form.append('file', file);
+	form.append('destination', destination);
+	form.append('file', file);
 
         return axios.post(
-            `${import.meta.env.VITE_API_URL}/file/upload/${encodeURIComponent(destination)}`,
-            form
+            `${import.meta.env.VITE_API_URL}/file/upload`,
+            form,
+	    {
+	        headers: {
+		    "Content-Type": "multipart/form-data"
+		}
+	    }
         ).then((response) => {
             return response.data.file.replaceAll('\\', '/');
         });

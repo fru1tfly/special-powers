@@ -27,12 +27,12 @@ app.use(bodyParser.json());
 
 const fileRouter = Router();
 fileRouter.post(
-    '/upload/:fileDestination',
+    '/upload',
     upload.single('file'),
     (req, res) => {
-        const destination = decodeURIComponent(req.params.fileDestination);
+        const destination = decodeURIComponent(req.body.destination);
         const newFileUrl = path.join(destination, req.file?.filename);
-
+	console.log(destination);
         res.status(200).json({ file: newFileUrl });
     }
 );

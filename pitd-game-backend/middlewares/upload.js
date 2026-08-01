@@ -5,8 +5,9 @@ import fs from 'fs';
 const storage = multer.diskStorage({
 
     destination: (req, file, callback) => {
-        const fileDestination = decodeURIComponent(req.params.fileDestination);
+        const fileDestination = decodeURIComponent(req.body.destination);
 
+	console.log(fileDestination, process.env.PUBLIC_FOLDER);
         // Make sure folder exists
         const uploadPath = path.join(process.env.PUBLIC_FOLDER, fileDestination);
         fs.mkdirSync(uploadPath, { recursive: true });

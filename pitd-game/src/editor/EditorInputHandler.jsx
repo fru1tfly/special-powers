@@ -142,7 +142,6 @@ const handleMouseDown = (event) => {
 
     const worldPoint = screenToWorld(event.pageX, event.pageY);
 
-	console.log(cameraOffset, zoomValue, imgDimensions);
     if (inputState === 'placing') {
         tempNodes.push(worldPoint);
     }
@@ -164,7 +163,6 @@ const handleMouseMove = async (event) => {
             x: cameraOrigin.x + (movement.x / zoomValue) * window.devicePixelRatio,
             y: cameraOrigin.y + (movement.y / zoomValue) * window.devicePixelRatio
         };
-	console.log(cameraOffset);
     }
 
     mousePosition.x = event.clientX;
@@ -261,7 +259,7 @@ const handleWheel = (event) => {
 const screenToWorld = (x, y) => {
 	const screen = new Vector2(x, y).times(window.devicePixelRatio);
 	const relativeToCenter = screen.minus(new Vector2(canvasWidth / 2, canvasHeight / 2));
-	const relativeToCamera = relativeToCenter.minus(new Vector2(cameraOffset.x, cameraOffset.y));
+	const relativeToCamera = relativeToCenter.minus(new Vector2(cameraOffset.x, cameraOffset.y).times(zoomValue));
 	const zoomScale = relativeToCamera.times(1 / zoomValue).times(1 / imgDimensions.height);
 
 	return zoomScale;
