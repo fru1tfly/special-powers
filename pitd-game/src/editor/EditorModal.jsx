@@ -313,7 +313,7 @@ export default function EditorModal() {
                                             <div className="multi-image-container">
                                                 {selectedInteractable.assets.map(img => (
                                                      <div className="form-image-container">
-                                                        <img className="form-image" src={ `${import.meta.env.VITE_DOMAIN}${img}`} />
+                                                        <img className="form-image" src={`${import.meta.env.VITE_DOMAIN}${img}`} />
                                                         <button className="form-image-delete-btn" onClick={() => deletePhoto(img)}>X</button>
                                                     </div>
                                                 ))}

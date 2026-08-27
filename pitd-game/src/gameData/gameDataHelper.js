@@ -8,6 +8,11 @@ export function getRoom(rooms, roomId) {
     return rooms.find(r => r.id === roomId);
 }
 
+export function hasFeature(state) {
+    const currentRoom = getRoom(state.rooms, state.room);
+    return currentRoom.features && currentRoom.features.length > 0;
+}
+
 export function loadRoomAssets(room) {
     const assetPromises = [];
 
@@ -21,7 +26,19 @@ export function loadRoomAssets(room) {
         }
     }
 
+    if (room.features) {
+        for (const f of room.features) {
+            for (const asset of Object.values(f.assets)) {
+                assetPromises.push(addImage(asset));
+            }
+        }
+    }
+
     return assetPromises;
+}
+
+export function loadFeatures(room) {
+    room.features[0].init();
 }
 
 export function screenToWorld(x, y) {

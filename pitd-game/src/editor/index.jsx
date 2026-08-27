@@ -31,16 +31,16 @@ export default function Editor() {
                 return;
             }
                 
-                if (!editorState.version || editorState.version < gameData.version) {
-                    updateEditorState(gameData);
+            if (!editorState.version || editorState.version < gameData.version) {
+                updateEditorState(gameData);
 
-                    await Promise.all(gameData.rooms.flatMap(room => loadRoomAssets(room)));
-                } else {
-                    await Promise.all(editorState.rooms.flatMap(room => loadRoomAssets(room)));
-                }
+                await Promise.all(gameData.rooms.flatMap(room => loadRoomAssets(room)));
+            } else {
+                await Promise.all(editorState.rooms.flatMap(room => loadRoomAssets(room)));
+            }
 
-                
-                setLoaded(true);
+            
+            setLoaded(true);
             
         }
 

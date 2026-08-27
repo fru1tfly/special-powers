@@ -1,6 +1,5 @@
-import { ctx } from "../editor/EditorCanvas"
 
-class LevelObject {
+export class LevelObject {
     name
     id
 
@@ -33,3 +32,13 @@ export class Interactable extends LevelObject {
     }
 }
 
+export class Feature extends LevelObject {
+    init() {
+    }
+
+    handleMouseMove(x, y, mouse) {
+    }
+
+    handleMouseDown(x, y) {
+    }
+}

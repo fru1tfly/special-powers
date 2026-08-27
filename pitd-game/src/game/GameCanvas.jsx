@@ -12,8 +12,14 @@ export let ctx;
 let roomBackground;
 let openArt = null;
 let interactables = [];
+let features = [];
 
-export const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
+export const imgDimensions = { 
+    width: screen.width * window.devicePixelRatio, 
+    height: screen.height * window.devicePixelRatio, 
+    xOffset: 0, 
+    yOffset: 0 
+};
 
 const sizeImage = () => {
     const imgAspectRatio = roomBackground.width / roomBackground.height;
@@ -81,6 +87,12 @@ const renderLoop = (time) => {
             );
         }
     }
+
+    for (const f of features) {
+        f.update(dt);
+        f.draw(ctx);
+    }
+
     ctx.restore();
 
     if (openArt) {
@@ -106,6 +118,7 @@ export default function GameCanvas() {
 
         canvas = gameCanvas.current;
         ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
 
         const resizeWindow = () => {
             const width = window.innerWidth;
@@ -139,7 +152,10 @@ export default function GameCanvas() {
     useEffect(() => {
         const room = gameState.rooms.find(r => r.id === gameState.room);
         roomBackground = getImage(room.imgUrl);
-        sizeImage();
+        
+        if (roomBackground) {
+            sizeImage();
+        }
 
         if (gameState.openArt && !openArt) {
             openArt = new AccentScreen(gameState.openArt);
@@ -150,7 +166,13 @@ export default function GameCanvas() {
             openArt.leave();
         }
 
-        interactables = room.interactables;
+        if (room.interactables) {
+            interactables = room.interactables;
+        }
+
+        if (room.features) {
+            features = [...room.features];
+        }
     }, [gameState]);
 
     return (

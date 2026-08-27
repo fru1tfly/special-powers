@@ -4,10 +4,14 @@ export const addImage = (url) => {
     return new Promise((resolve, reject) => {
         const img = new Image();
 	    img.src = `${import.meta.env.VITE_DOMAIN}${url}`;
+        img.setAttribute('crossOrigin', '');
         img.onload = () => {
             resolve(img);
         };
-        img.onerror = reject;
+        img.onerror = (e) => {
+            console.error(e);
+            reject(img);
+        }
 
         IMAGES[url] = {};
 

@@ -2,6 +2,7 @@ import './App.css'
 import Editor from './editor'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import GameManager from './game/GameManager'
+import SurgeryTestPage from './game/surgery/SurgeryTestPage'
 
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<GameManager />} />
         <Route path="/editor" element={<Editor />} />
+        <Route path="/surgery" element={<SurgeryTestPage />} />
       </Routes>
     </BrowserRouter>
   )

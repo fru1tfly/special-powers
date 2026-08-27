@@ -32,7 +32,6 @@ fileRouter.post(
     (req, res) => {
         const destination = decodeURIComponent(req.body.destination);
         const newFileUrl = path.join(destination, req.file?.filename);
-	console.log(destination);
         res.status(200).json({ file: newFileUrl });
     }
 );
