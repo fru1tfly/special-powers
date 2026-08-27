@@ -209,7 +209,6 @@ export class Surgery extends Feature {
                         this.assets.stitchTied,
                         this.assets.stitchUntied
                     ));
-                    console.log(this.stitches);
                 }
             }
         }

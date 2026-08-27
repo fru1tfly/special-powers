@@ -26,10 +26,7 @@ export default function SurgeryTestPage() {
     useEffect(() => {
         const init = async () => {
             await Promise.all(surgeryRoomBaseState.rooms.flatMap(room => loadRoomAssets(room)));
-            console.log(surgeryRoomBaseState);
             surgeryRoomBaseState.rooms.flatMap(room => loadFeatures(room));
-            
-            console.log(surgeryRoomBaseState);
             setGameState({
                 ...surgeryRoomBaseState
             });
