@@ -131,22 +131,25 @@ export default function EditorCanvas() {
         }
 
         const roomData = editorState.rooms.find(r => r.id === currentRoom);
-        const background = roomData.interactables.find(i => i.objectType === 'Background');
-        const imgSrc = background?.assets[0] ?? null;
 
-        if (imgSrc) {
-            roomBackground = getImage(imgSrc);
-            sizeImage();
-        } else {
-            roomBackground = null;
-        }
+        if (roomData) {
+            const background = roomData.interactables.find(i => i.objectType === 'Background');
+            const imgSrc = background?.assets[0] ?? null;
 
-        shapes = [];
-        roomData.interactables.forEach(i => {
-            if (i.points.length > 0) {
-                shapes.push(i);
+            if (imgSrc) {
+                roomBackground = getImage(imgSrc);
+                sizeImage();
+            } else {
+                roomBackground = null;
             }
-        });
+
+            shapes = [];
+            roomData.interactables.forEach(i => {
+                if (i.points.length > 0) {
+                    shapes.push(i);
+                }
+            });
+        }
     }, [editorState]);
 
     return (
