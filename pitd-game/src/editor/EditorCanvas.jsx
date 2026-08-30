@@ -125,35 +125,28 @@ export default function EditorCanvas() {
     }, []);
 
     useEffect(() => {
-        const imgSrc = editorState.rooms.find(r => 
-            r.id === editorState.selectedRoom
-        )?.imgUrl;
 
         if (currentRoom !== editorState.selectedRoom) {
             currentRoom = editorState.selectedRoom;
         }
 
+        const roomData = editorState.rooms.find(r => r.id === currentRoom);
+        const background = roomData.interactables.find(i => i.objectType === 'Background');
+        const imgSrc = background?.assets[0] ?? null;
+
         if (imgSrc) {
-	        roomBackground = new Image();
-            roomBackground.src = `${import.meta.env.VITE_DOMAIN}${imgSrc}`;
-            roomBackground.onload = () => {
-                sizeImage();
-            }
+            roomBackground = getImage(imgSrc);
+            sizeImage();
         } else {
             roomBackground = null;
         }
 
         shapes = [];
-
-        editorState.rooms.forEach(r => {
-            if (r.id !== editorState.selectedRoom) return;
-            r.interactables.forEach(i => {
-                if (i.points.length > 0) {
-                    shapes.push(i);
-                }
-                
-            })
-        })
+        roomData.interactables.forEach(i => {
+            if (i.points.length > 0) {
+                shapes.push(i);
+            }
+        });
     }, [editorState]);
 
     return (

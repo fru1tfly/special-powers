@@ -8,8 +8,8 @@ export function useUploadFile() {
         setIsLoading(true);
 
         const form = new FormData();
-	form.append('destination', destination);
-	form.append('file', file);
+        form.append('destination', destination);
+        form.append('file', file);
 
         return axios.post(
             `${import.meta.env.VITE_API_URL}/file/upload`,

@@ -9,10 +9,13 @@ export function useInteractable() {
         switch (interactable.objectType) {
             case 'Door': {
                 if (!interactable.isLocked || gameState.inventory.includes(interactable.key)) {
+
                     setGameState({
                         ...gameState,
-                        room: interactable.destination
+                        room: interactable.destination,
+                        transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null
                     });
+                    
                     return true;
                 } else {
                     console.log("it's locked");

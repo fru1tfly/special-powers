@@ -5,6 +5,7 @@ import { gameData } from "../gameData/gameData";
 import { getImage } from "../gameData/images";
 import { AccentScreen } from "../gameTypes/AccentScreen";
 import { showOnScreen } from "../gameData/gameDataHelper";
+import { Animation } from "../gameTypes/LevelObjects";
 
 let canvas;
 export let ctx;
@@ -13,6 +14,8 @@ let roomBackground;
 let openArt = null;
 let interactables = [];
 let features = [];
+let transitionAnim;
+let backgroundAnim;
 
 export const imgDimensions = { 
     width: screen.width * window.devicePixelRatio, 
@@ -57,14 +60,32 @@ const renderLoop = (time) => {
 
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
-    if (roomBackground) {
+    if (backgroundAnim && !transitionAnim) {
+        const img = backgroundAnim.getCurrentImage();
+
         ctx.drawImage(
-            roomBackground,
+            img,
             imgDimensions.xOffset - canvas.width / 2,
             imgDimensions.yOffset - canvas.height / 2,
             imgDimensions.width,
             imgDimensions.height
         );
+
+        backgroundAnim.update(dt);
+    }
+
+    if (transitionAnim) {
+        const img = transitionAnim.getCurrentImage();
+
+        ctx.drawImage(
+            img,
+            imgDimensions.xOffset - canvas.width / 2,
+            imgDimensions.yOffset - canvas.height / 2,
+            imgDimensions.width,
+            imgDimensions.height
+        );
+
+        transitionAnim.update(dt);
     }
 
     ctx.save();
@@ -72,7 +93,14 @@ const renderLoop = (time) => {
 
     for (const i of interactables) {
         if (showOnScreen(i)) {
-            const intImage = getImage(i.assets[0]);
+            let intImage;
+
+            if (i.frames) {
+                intImage = i.frames.getCurrentImage();
+                i.frames.update(dt);
+            } else {
+                intImage = getImage(i.assets[0]);
+            }
 
             const scaleFactor = imgDimensions.height / window.devicePixelRatio;
             const imgWidth = intImage.width / scaleFactor
@@ -113,6 +141,7 @@ const renderLoop = (time) => {
 export default function GameCanvas() {
     const gameCanvas = useRef(null);
     const gameState = useContext(GameContext);
+    const setGameState = useContext(SetGameContext);
 
     useEffect(() => {
 
@@ -151,12 +180,15 @@ export default function GameCanvas() {
 
     useEffect(() => {
         const room = gameState.rooms.find(r => r.id === gameState.room);
-        roomBackground = getImage(room.imgUrl);
-        
-        if (roomBackground) {
+        const background = room.interactables.find(i => i.objectType === 'Background');
+
+        if (background) {
+            backgroundAnim = initializeAnimation(background.frames);
+            console.log(background.frames);
+            roomBackground = getImage(background.frames.frames[0]);
             sizeImage();
         }
-
+        
         if (gameState.openArt && !openArt) {
             openArt = new AccentScreen(gameState.openArt);
             openArt.start();
@@ -168,14 +200,48 @@ export default function GameCanvas() {
 
         if (room.interactables) {
             interactables = room.interactables;
+
+            for (const i of interactables) {
+                if (i.frames) {
+                    i.frames = initializeAnimation(i.frames);
+                }
+            }
         }
 
         if (room.features) {
             features = [...room.features];
         }
+        
+        let unsubscribe = () => {};
+
+        if (gameState.transitionAnim) {
+            transitionAnim = initializeAnimation(gameState.transitionAnim);
+
+            unsubscribe = transitionAnim.on('end', () => {
+                console.log('in the end callback');
+                setGameState({
+                    ...gameState,
+                    transitionAnim: null
+                });
+                transitionAnim = null;
+            })
+        }
+
+        return unsubscribe;
+        
     }, [gameState]);
 
     return (
         <canvas ref={gameCanvas}></canvas>
     )
+}
+
+function initializeAnimation(anim) {
+    const newAnim = new Animation();
+    newAnim.frames = [...anim.frames];
+    newAnim.frameRate = anim.frameRate;
+    newAnim.loopMode = anim.loopMode;
+    newAnim.timesToPlay = anim.timesToPlay;
+
+    return newAnim;
 }

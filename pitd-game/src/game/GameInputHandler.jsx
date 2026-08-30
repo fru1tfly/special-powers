@@ -26,6 +26,8 @@ export default function GameInputHandler() {
         }
 
         const handleMouseMove = (event) => {
+            if (gameState.transitionAnim) return;
+
             const mousePoint = screenToWorld(event.clientX, event.clientY);
 
             if (!gameState.openArt) {
@@ -40,6 +42,8 @@ export default function GameInputHandler() {
                                 updateCursor('door');
                             } else if (int.objectType === 'Art') {
                                 updateCursor('look');
+                            } else if (int.objectType === 'MovePoint') {
+                                updateCursor(int.icon);
                             }
                         }
                     } else if (showOnScreen(int)) {
@@ -67,6 +71,8 @@ export default function GameInputHandler() {
         };
 
         const handleMouseDown = (event) => {
+            if (gameState.transitionAnim) return;
+            
             const mousePoint = screenToWorld(event.clientX, event.clientY);
 
             setMouseState('pressed');

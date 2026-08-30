@@ -61,12 +61,12 @@ export default function Editor() {
             {loaded && 
                 <EditorContext.Provider value={editorState}>
                     <SetEditorContext.Provider value={updateEditorState}>
-                        <EditorMenu/>
                         <EditorCanvas/>
-                        {editorState.selectedInteractable && 
+                        <EditorMenu/>
+                        {editorState.selectedInteractable &&
                             <EditorModal/>
                         }
-                        {!editorState.selectedInteractable && 
+                        {!editorState.selectedInteractable &&
                             ( 
                                 <div className="help-text">
                                     <div className="help-text-item">

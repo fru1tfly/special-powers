@@ -3,6 +3,7 @@ import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
 import { addImage } from "./images";
 import { imgDimensions } from "../game/GameCanvas";
+import { hasPosition } from "./Interactables";
 
 export function getRoom(rooms, roomId) {
     return rooms.find(r => r.id === roomId);
@@ -86,5 +87,5 @@ export function inImageBounds(point, image, origin) {
 }
 
 export function showOnScreen(interactable) {
-    return interactable.objectType === 'Key';
+    return hasPosition(interactable.objectType);
 }

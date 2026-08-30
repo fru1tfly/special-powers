@@ -1,3 +1,5 @@
+import { addImage } from "./images";
+
 export const cursors = {
     'main': `url("${import.meta.env.BASE_URL}cursor.png"), auto`,
     'dragMode': `url("${import.meta.env.BASE_URL}grabbing.png") 25 25, auto`,
@@ -10,5 +12,52 @@ export const cursors = {
     'look': `url("${import.meta.env.BASE_URL}look.png") 15 15, auto`,
     'rag': `url("${import.meta.env.BASE_URL}rag.png") 10 10, auto`,
     'scissors': `url("${import.meta.env.BASE_URL}scissors.png") 25 25, auto`,
-    'hands': `url("${import.meta.env.BASE_URL}hands.png") 50 50, auto`
+    'hands': `url("${import.meta.env.BASE_URL}hands.png") 50 50, auto`,
+    'up': `url("${import.meta.env.BASE_URL}up.png") 25 25, auto`,
+    'down': `url("${import.meta.env.BASE_URL}down.png") 25 25, auto`,
+    'left': `url("${import.meta.env.BASE_URL}left.png") 25 25, auto`,
+    'right': `url("${import.meta.env.BASE_URL}right.png") 25 25, auto`,
+    'upright': `url("${import.meta.env.BASE_URL}upright.png") 25 25, auto`,
+    'upleft': `url("${import.meta.env.BASE_URL}upleft.png") 25 25, auto`,
+    'downright': `url("${import.meta.env.BASE_URL}downright.png") 25 25, auto`,
+    'downleft': `url("${import.meta.env.BASE_URL}downleft.png") 25 25, auto`,
 }; 
+
+Promise.all([
+    addImage("cursor.png", import.meta.env.BASE_URL),
+    addImage("grabbing.png", import.meta.env.BASE_URL),
+    addImage("grabbed.png", import.meta.env.BASE_URL),
+    addImage("precise.png", import.meta.env.BASE_URL),
+    addImage("door.png", import.meta.env.BASE_URL),
+    addImage("look.png", import.meta.env.BASE_URL),
+    addImage("rag.png", import.meta.env.BASE_URL),
+    addImage("scissors.png", import.meta.env.BASE_URL),
+    addImage("hands.png", import.meta.env.BASE_URL),
+    addImage("up.png", import.meta.env.BASE_URL),
+    addImage("down.png", import.meta.env.BASE_URL),
+    addImage("left.png", import.meta.env.BASE_URL),
+    addImage("right.png", import.meta.env.BASE_URL),
+    addImage("upright.png", import.meta.env.BASE_URL),
+    addImage("upleft.png", import.meta.env.BASE_URL),
+    addImage("downright.png", import.meta.env.BASE_URL),
+    addImage("downleft.png", import.meta.env.BASE_URL),
+])
+
+export const cursorImages = {
+    'main': `cursor.png`,
+    'hovering': `grabbing.png`,
+    'dragging': `grabbed.png`,
+    'door': `door.png`,
+    'look': `look.png`,
+    'rag': `rag.png`,
+    'scissors': `scissors.png`,
+    'hands': `hands.png`,
+    'up': 'up.png',
+    'down': 'down.png',
+    'left': 'left.png',
+    'right': 'right.png',
+    'upright': 'upright.png',
+    'upleft': 'upleft.png',
+    'downright': 'downright.png',
+    'downleft': 'downleft.png',
+};

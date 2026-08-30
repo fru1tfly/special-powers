@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import EditorSidebar from "./EditorSidebar"
 import { EditorContext, SetEditorContext } from "./EditorContext"
 import { Room, Interactable } from "../gameTypes/LevelObjects"
@@ -14,6 +14,7 @@ export default function EditorMenu() {
 
     const selectedRoom = editorState.rooms.find(r => r.id === editorState.selectedRoom)
     const selectedInteractable = selectedRoom?.interactables.find(i => i.id === editorState.selectedInteractable)
+    const selectedIntIndex = selectedRoom?.interactables.indexOf(selectedInteractable)
 
     const handleAddRoom = () => {
         const newRoom = new Room()
@@ -120,6 +121,45 @@ export default function EditorMenu() {
         })
     }
 
+    const increaseLayer = () => {
+        setEditorState({
+            ...editorState,
+            rooms: editorState.rooms.map(r => {
+                if (r.id === selectedRoom.id) {
+                    r.interactables = swapInteractables(r.interactables, selectedIntIndex, selectedIntIndex + 1)
+                }
+                return r;
+            })
+        })
+    }
+
+    const decreaseLayer = () => {
+        setEditorState({
+            ...editorState,
+            rooms: editorState.rooms.map(r => {
+                if (r.id === selectedRoom.id) {
+                    r.interactables = swapInteractables(r.interactables, selectedIntIndex, selectedIntIndex - 1)
+                }
+                return r;
+            })
+        })
+    }
+
+    const swapInteractables = (ints, a, b) => {
+        const copy = [...ints];
+        const tempA = copy[a];
+
+        copy[a] = copy[b];
+        copy[b] = tempA;
+
+        return copy;
+    }
+
+    console.log(selectedIntIndex);
+    const upButtonClass = selectedIntIndex === selectedRoom?.interactables.length - 1 || !selectedInteractable ? 'disabled-btn' : '';
+    const downButtonClass = selectedIntIndex === 0 || !selectedInteractable ? 'disabled-btn' : '';
+    const deleteButtonClass = !selectedInteractable ? 'disabled-btn' : '';
+
     return (
         <div className="menu">
             <EditorSidebar>
@@ -154,16 +194,21 @@ export default function EditorMenu() {
                 <EditorSidebar>
                     <div className="section-label">Room Name</div>
                     <input type="text" value={selectedRoom.name} onChange={handleNameChange} />
-                    <label htmlFor="bg" className="uploadLabel">
+                    {/* <label htmlFor="bg" className="uploadLabel">
                         {selectedRoom.imgUrl ? 'Swap ' : 'Add '}
                         Background
                     </label>
-                    <input type="file" accept="image/*" onChange={uploadBackground} id="bg" />
-                    <button id="newShape" onClick={handleNewInteractable} className="action-btn">New Interactable</button>
+                    <input type="file" accept="image/*" onChange={uploadBackground} id="bg" /> */}
+                    <button id="newShape" onClick={handleNewInteractable} className="action-btn">New Game Object</button>
 
-                    <div className="section-label">Interactables</div>
+                    <div className="section-label">Game Objects</div>
+                    <div className="btn-row">
+                        <button onClick={increaseLayer} className={upButtonClass}>⬆</button>
+                        <button onClick={decreaseLayer} className={downButtonClass}>⬇</button>
+                        <button onClick={() => deleteInteractable(selectedInteractable.id)} className={deleteButtonClass}>Delete</button>
+                    </div>
                     <div className="section-container" id="shapeList">
-                        {selectedRoom.interactables.map(i => (
+                        {selectedRoom.interactables.toReversed().map((i, ind) => (
                             <div
                                 key={i.id}
                                 className={
@@ -176,10 +221,6 @@ export default function EditorMenu() {
                                  <div className="section-item-title">
                                     {i.name}
                                 </div>
-                                <button onClick={(event) => {
-                                    event.stopPropagation()
-                                    deleteInteractable(i.id)
-                                }}>Delete</button>
                             </div>
                         ))}
                     </div>

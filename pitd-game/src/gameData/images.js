@@ -1,9 +1,9 @@
 const IMAGES = {};
 
-export const addImage = (url) => {
+export const addImage = (url, prefix = import.meta.env.VITE_DOMAIN) => {
     return new Promise((resolve, reject) => {
         const img = new Image();
-	    img.src = `${import.meta.env.VITE_DOMAIN}${url}`;
+	    img.src = `${prefix}${url}`;
         img.setAttribute('crossOrigin', '');
         img.onload = () => {
             resolve(img);

@@ -6,13 +6,19 @@ import { startShapeMode, shapeModeSubscribe, getShapeMode, cameraOffset, startMo
 import { useGetInteractable, useUpdateInteractable } from "../hooks/editor/InteractableHelper";
 import { Vector2 } from "../gameTypes/Vector";
 import { addImage } from "../gameData/images";
+import AnimationModal from "./AnimationModal";
+import { cursorImages, cursors } from "../gameData/cursors";
+import { hasArea, hasPosition } from "../gameData/Interactables";
 
-const TYPES = [
-    '--None--',
-    'Art',
-    'Door',
-    'Key'
-]
+const TYPES = {
+    '--None--': '',
+    'Art': 'Art',
+    'Door': 'Door',
+    'Key': 'Key',
+    'Background': 'Background',
+    'Move Point': 'MovePoint',
+    'Animated Object': 'AnimatedObject'
+}
 
 export default function EditorModal() {
     const editorState = useContext(EditorContext);
@@ -20,6 +26,9 @@ export default function EditorModal() {
 
     const shapeMode = useSyncExternalStore(shapeModeSubscribe, getShapeMode);
     const moveMode = useSyncExternalStore(moveModeSubscribe, getMoveMode);
+
+    const [animMode, setAnimMode] = useState(false);
+    const [animField, setAnimField] = useState('');
 
     const { uploadFile } = useUploadFile();
 
@@ -90,7 +99,7 @@ export default function EditorModal() {
             case 'rooms': {
                 
                 return [
-                    (<option>--Select--</option>),
+                    (<option key="none">--Select--</option>),
                     editorState.rooms.map(room => {
                         if (room.id === editorState.selectedRoom) return null;
 
@@ -99,7 +108,7 @@ export default function EditorModal() {
                             opts['selected'] = 'selected';
                         }
 
-                        return (<option {...opts} value={room.id}>{room.name}</option>)
+                        return (<option {...opts} key={room.id} value={room.id}>{room.name}</option>)
                     }).filter(op => op !== null)
                 ]
             }
@@ -124,6 +133,18 @@ export default function EditorModal() {
                     })
                 ];
             }
+            case 'cursors': {
+                return [
+                    (<option>--Select--</option>),
+                    Object.keys(cursorImages).map((cursor) => {
+                        const opts = {};
+                        if (selectedInteractable[formValue] === cursorImages[cursor]) {
+                            opts['selected'] = 'selected';
+                        }
+                        return (<option {...opts} value={cursorImages[cursor]}>{cursor}</option>)
+                    })
+                ];
+            }
         }
     }
 
@@ -143,18 +164,7 @@ export default function EditorModal() {
         });
     }
 
-    const uploadMulti = async (event) => {
-        const files = Array.from(event.target.files);
-
-        const newUrls = await Promise.all(files.map(file => uploadFile(file, '/images/sprites')))
-        updateInteractable({
-            ...selectedInteractable,
-            assets: [ 
-                ...selectedInteractable.assets,
-                ...newUrls
-            ]
-        });
-    }
+   
 
     const deletePhoto = (img) => {
         updateInteractable({
@@ -164,14 +174,14 @@ export default function EditorModal() {
     }
 
     const startWorldEdit = () => {
-        if (selectedInteractable.objectType !== 'Key') {
+        if (hasArea(selectedInteractable.objectType)) {
             updateInteractable({
                 ...selectedInteractable,
                 points: []
             });
 
             startShapeMode();
-        } else {
+        } else if (hasPosition(selectedInteractable.objectType)) {
             let point = selectedInteractable.points.length > 0 
                 ? selectedInteractable.points[0] 
                 : new Vector2(-cameraOffset.x, -cameraOffset.y);
@@ -189,11 +199,11 @@ export default function EditorModal() {
     }
 
     let worldEditText = 'Draw Area';
-    if (selectedInteractable.objectType !== 'Key') {
+    if (hasArea(selectedInteractable.objectType)) {
         if (selectedInteractable.points.length > 0) {
             worldEditText = 'Redraw Area';
         }
-    } else {
+    } else if (hasPosition(selectedInteractable.objectType)) {
         if (selectedInteractable.points.length > 0) {
             worldEditText = 'Edit Position';
         } else {
@@ -201,7 +211,7 @@ export default function EditorModal() {
         }
     }
 
-    function deselectInteractable() {
+    const deselectInteractable = () => {
         setEditorState({
             ...editorState,
             selectedInteractable: null
@@ -219,6 +229,15 @@ export default function EditorModal() {
             }),
             selectedInteractable: null
         })
+    }
+
+    const handleEditAnimation = (fieldName) => {
+        setAnimField(fieldName);
+        setAnimMode(true);
+    }
+
+    const handleCloseAnimation = () => {
+        setAnimMode(false);
     }
 
     return shapeMode ? (
@@ -252,6 +271,8 @@ export default function EditorModal() {
                 <span className="instruction-text">Done</span>
             </div>
         </div>
+    ) : animMode ? (
+        <AnimationModal animatedField={animField} closeModal={handleCloseAnimation} />
     ) : (
         <div className="editor-modal">
             <div className="modal-body">
@@ -263,73 +284,81 @@ export default function EditorModal() {
                     <div className="modal-field">
                         <div className="modal-field-label">Type</div>
                         <select onChange={handleTypeChange} value={selectedInteractable.objectType}>
-                            {TYPES.map(t => { 
-                                return (<option key={t}>{t}</option>); 
+                            {Object.keys(TYPES).map(t => { 
+                                return (<option key={TYPES[t]} value={TYPES[t]}>{t}</option>); 
                             })}
                         </select>
                     </div>
                     {
                         selectedInteractable.objectType && Object.keys(interactableFormValues[selectedInteractable.objectType]).map(formValue => {
                             const def = interactableFormValues[selectedInteractable.objectType][formValue];
-                            const opts = {};
-                            if (def.type === 'checkbox' && selectedInteractable[formValue]) {
-                                opts['checked'] = 'checked';
-                            }
+                            if (typeof def === 'boolean') return;
 
                             if (def.visible && !selectedInteractable[def.visible]) {
-                                return <></>;
+                                return;
                             }
 
                             return (
-                                <div key={formValue} className="modal-field">
-                                    <div className="modal-field-label">{def.name}</div>
-                                    {def.type === 'dropdown' && (
-                                        <select onChange={(event) => handleFormValueChange(formValue, event)}>
-                                            {getOptions(def.options, formValue)}
-                                        </select>
-                                    )}
-                                    {def.type === 'checkbox' && (
-                                        <div>
-                                            <input type="checkbox" {...opts} onChange={(event) => handleFormValueChange(formValue, event)}/>
-                                        </div>
-                                    )}
-                                    {def.type === 'photo' && selectedInteractable.assets.length === 0 && (
-                                        <>
-                                            <label htmlFor="sprite" className="uploadLabel">Add Photo</label>
-                                            <input type="file" accept="image/*" onChange={uploadSprite} id="sprite" />
-                                        </>
-                                    )}
-                                    {def.type === 'photo' && selectedInteractable.assets.length === 1 && (
-                                        <>
-                                            <div className="form-image-container">
-                                                <img className="form-image" src={ `${import.meta.env.VITE_DOMAIN}${selectedInteractable.assets[0]}`} />
+                                <>
+                                    <div key={formValue} className="modal-field">
+                                        <div className="modal-field-label">{def.name}</div>
+                                        {def.type === 'dropdown' && (
+                                            <div className={def.options === 'cursors' ? 'dropdown-container dropdown-container-offset' : 'dropdown-container'}>
+                                                <select onChange={(event) => handleFormValueChange(formValue, event)}>
+                                                    {getOptions(def.options, formValue)}
+                                                </select>
                                             </div>
-                                            <label htmlFor="sprite" className="uploadLabel">Swap Photo</label>
-                                            <input type="file" accept="image/*" onChange={uploadSprite} id="sprite" />
-                                        </>
-                                    )}
-                                    {def.type === 'multi photo' && (
-                                        <>
-                                            <div className="multi-image-container">
-                                                {selectedInteractable.assets.map(img => (
-                                                     <div className="form-image-container">
-                                                        <img className="form-image" src={`${import.meta.env.VITE_DOMAIN}${img}`} />
-                                                        <button className="form-image-delete-btn" onClick={() => deletePhoto(img)}>X</button>
+                                        )}
+                                        {def.type === 'checkbox' && (
+                                            <div>
+                                                <input type="checkbox" checked={selectedInteractable[formValue]} onChange={(event) => handleFormValueChange(formValue, event)}/>
+                                            </div>
+                                        )}
+                                        {def.type === 'photo' && selectedInteractable.assets.length === 0 && (
+                                            <>
+                                                <label htmlFor="sprite" className="uploadLabel">Add Photo</label>
+                                                <input type="file" accept="image/*" onChange={uploadSprite} id="sprite" />
+                                            </>
+                                        )}
+                                        {def.type === 'photo' && selectedInteractable.assets.length === 1 && (
+                                            <>
+                                                {selectedInteractable.assets.length > 0 &&
+                                                    <div className="form-image-container">
+                                                        <img className="form-image" src={ `${import.meta.env.VITE_DOMAIN}${selectedInteractable.assets[0]}`} />
                                                     </div>
-                                                ))}
+                                                }
+                                                <label htmlFor="sprite" className="uploadLabel">Swap Photo</label>
+                                                <input type="file" accept="image/*" onChange={uploadSprite} id="sprite" />
+                                            </>
+                                        )}
+                                        {def.type === 'animation' && (
+                                            <>
+                                                {selectedInteractable.assets.length > 0 &&
+                                                    <div className="form-image-container">
+                                                        <img className="form-image" src={ `${import.meta.env.VITE_DOMAIN}${selectedInteractable.assets[0]}`} />
+                                                    </div>
+                                                }
+                                                <button onClick={() => handleEditAnimation(formValue)}>Edit Animation</button>
+                                            </>
+                                        )}
+
+                                        {def.options === 'cursors' && 
+                                            <div className="form-icon-container">
+                                                {selectedInteractable[formValue] && 
+                                                    <img className="form-icon" src={ `${import.meta.env.BASE_URL}${selectedInteractable[formValue]}`} />
+                                                }
                                             </div>
-                                            <label htmlFor="sprite" className="uploadLabel">Add Photos</label>
-                                            <input type="file" accept="image/*" onChange={uploadMulti} id="sprite" multiple />
-                                        </>
-                                    )}
-                                </div>
+                                        }
+                                    </div>
+                                    
+                                </>
                             )
                         })
                     }
                 </div>
             </div>
             <div className="modal-footer">
-                {selectedInteractable.objectType && (selectedInteractable.objectType !== 'Key' || selectedInteractable.assets.length > 0) && (
+                {selectedInteractable.objectType && (hasPosition(selectedInteractable.objectType) || hasArea(selectedInteractable.objectType)) && (
                     <button className="modal-footer-button" onClick={startWorldEdit}>
                         {worldEditText}
                     </button>
