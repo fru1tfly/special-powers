@@ -37,13 +37,15 @@ export const interactableFormValues = {
             type: 'dropdown',
             options: 'cursors'
         },
-        transitionFrames: {
-            name: 'Transition',
-            type: 'animation'
-        },
+        
         touchVisible: {
             name: 'Display Icon on Mobile?',
             type: 'checkbox'
+        },
+
+        transitionFrames: {
+            name: 'Transition',
+            type: 'animation'
         }
     },
     Key: {

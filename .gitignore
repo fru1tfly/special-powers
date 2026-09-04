@@ -16,7 +16,7 @@ pitd-game-backend/node_modules
 pitd-game/.env
 pitd-game-backend/.env
 pitd-game-backend/public
-*gameData.json
+pitd-game-backend/src/gameData.json
 
 # Editor directories and files
 .vscode/*

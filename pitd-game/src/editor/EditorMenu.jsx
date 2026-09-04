@@ -155,7 +155,6 @@ export default function EditorMenu() {
         return copy;
     }
 
-    console.log(selectedIntIndex);
     const upButtonClass = selectedIntIndex === selectedRoom?.interactables.length - 1 || !selectedInteractable ? 'disabled-btn' : '';
     const downButtonClass = selectedIntIndex === 0 || !selectedInteractable ? 'disabled-btn' : '';
     const deleteButtonClass = !selectedInteractable ? 'disabled-btn' : '';

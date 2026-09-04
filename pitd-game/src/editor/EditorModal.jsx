@@ -80,8 +80,8 @@ export default function EditorModal() {
         })
     }
 
-    const handleFormValueChange = (varName, event) => {
-        if (event.target.checked !== undefined) { 
+    const handleFormValueChange = (varName, event, isCheckbox = false) => {
+        if (isCheckbox) { 
             updateInteractable({
                 ...selectedInteractable,
                 [varName]: event.target.checked
@@ -141,7 +141,7 @@ export default function EditorModal() {
                         if (selectedInteractable[formValue] === cursorImages[cursor]) {
                             opts['selected'] = 'selected';
                         }
-                        return (<option {...opts} value={cursorImages[cursor]}>{cursor}</option>)
+                        return (<option {...opts} value={cursor}>{cursor}</option>)
                     })
                 ];
             }
@@ -163,8 +163,6 @@ export default function EditorModal() {
             });
         });
     }
-
-   
 
     const deletePhoto = (img) => {
         updateInteractable({
@@ -309,9 +307,25 @@ export default function EditorModal() {
                                                 </select>
                                             </div>
                                         )}
+                                        {def.type === 'slider' && (
+                                            <div>
+                                                <input 
+                                                    type="range" 
+                                                    onChange={(event) => handleFormValueChange(formValue, event)}
+                                                    min={def.min}
+                                                    max={def.max}
+                                                    step={def.step}
+                                                    value={selectedInteractable[formValue] ?? def.default}
+                                                />
+                                            </div>
+                                        )}
                                         {def.type === 'checkbox' && (
                                             <div>
-                                                <input type="checkbox" checked={selectedInteractable[formValue]} onChange={(event) => handleFormValueChange(formValue, event)}/>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={selectedInteractable[formValue]} 
+                                                    onChange={(event) => handleFormValueChange(formValue, event, true)}
+                                                />
                                             </div>
                                         )}
                                         {def.type === 'photo' && selectedInteractable.assets.length === 0 && (
@@ -345,7 +359,10 @@ export default function EditorModal() {
                                         {def.options === 'cursors' && 
                                             <div className="form-icon-container">
                                                 {selectedInteractable[formValue] && 
-                                                    <img className="form-icon" src={ `${import.meta.env.BASE_URL}${selectedInteractable[formValue]}`} />
+                                                    <img 
+                                                        className="form-icon" 
+                                                        src={ `${import.meta.env.BASE_URL}${cursorImages[selectedInteractable[formValue]]}`} 
+                                                    />
                                                 }
                                             </div>
                                         }

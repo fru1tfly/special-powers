@@ -60,10 +60,8 @@ export default function AnimationModal({ animatedField, closeModal }) {
 
         const newUrls = await Promise.all(files.map(async (file) => {
             const newUrl = await uploadFile(file, '/images/sprites');
-            console.log(newUrl);
             return newUrl;
         }));
-        console.log(newUrls);
 
         await Promise.all(newUrls.map(url => addImage(url)));
 

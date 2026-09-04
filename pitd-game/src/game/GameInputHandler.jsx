@@ -8,6 +8,7 @@ import { getImage } from "../gameData/images";
 export default function GameInputHandler() {
     const [cursorState, setCursorState] = useState('main');
     const [mouseState, setMouseState] = useState('idle');
+
     const gameState = useContext(GameContext);
     const setGameState = useContext(SetGameContext);
     const { interact } = useInteractable();
@@ -18,6 +19,8 @@ export default function GameInputHandler() {
     };
 
     useEffect(() => {
+        if (!gameState) return;
+        
         const interactables = getRoom(gameState.rooms, gameState.room).interactables;
 
         if (hasFeature(gameState)) {
@@ -114,14 +117,23 @@ export default function GameInputHandler() {
             setMouseState('idle');
         }
 
+        const handleTouchStart = (event) => {
+            setGameState({
+                ...gameState,
+                touchMode: true
+            })
+        }
+
         window.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('touchstart', handleTouchStart);
 
         return () => {
             window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mousemove', handleMouseMove);
-            window.addEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchstart', handleTouchStart);
         }
     }, [gameState, mouseState]);
     return <></>;

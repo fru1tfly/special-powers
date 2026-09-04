@@ -14,28 +14,39 @@ export function hasFeature(state) {
     return currentRoom.features && currentRoom.features.length > 0;
 }
 
-export function loadRoomAssets(room) {
+export function loadRoomAssets(room, callback) {
     const assetPromises = [];
 
-	if (room.imgUrl) {
-        assetPromises.push(addImage(room.imgUrl));
-	}
-    
     for (const i of room.interactables) {
         for (const asset of i.assets) {
-            assetPromises.push(addImage(asset));
+            assetPromises.push(addImage(asset, import.meta.env.VITE_DOMAIN, callback));
         }
     }
 
     if (room.features) {
         for (const f of room.features) {
             for (const asset of Object.values(f.assets)) {
-                assetPromises.push(addImage(asset));
+                assetPromises.push(addImage(asset, import.meta.env.VITE_DOMAIN, callback));
             }
         }
     }
 
     return assetPromises;
+}
+
+export function getRoomAssetCount(room) {
+    let count = 0;
+    for (const i of room.interactables) {
+        count += i.assets.length;
+    }
+
+    if (room.features) {
+        for (const f of room.features) {
+            count += Object.keys(f.assets).length;
+        }
+    }
+
+    return count;
 }
 
 export function loadFeatures(room) {
@@ -88,4 +99,24 @@ export function inImageBounds(point, image, origin) {
 
 export function showOnScreen(interactable) {
     return hasPosition(interactable.objectType);
+}
+
+export function getCenter(points) {
+    let minX;
+    let minY;
+    let maxX;
+    let maxY;
+
+    for (const p of points) {
+        if (!minX || p.x < minX) minX = p.x;
+        if (!minY || p.y < minY) minY = p.y;
+
+        if (!maxX || p.x > maxX) maxX = p.x;
+        if (!maxY || p.y > maxY) maxY = p.y;
+    }
+
+    return { 
+        x: (maxX + minX) / 2,
+        y: (maxY + minY) / 2
+    }
 }

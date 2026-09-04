@@ -1,4 +1,44 @@
+:root {
+    --purple-1: #7c425b;
+    --purple-2: #c1668e;
+}
+
 .custom-cursor {
     position: fixed;
     z-index: 10000;
+}
+
+.preloader-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 5px solid var(--purple-1);
+    border-radius: 1rem;
+    width: 20rem;
+    height: 4rem;
+    display: flex;
+}
+
+.preloader-bar {
+    background-color: var(--purple-2);
+    margin: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.play-btn {
+    border: 5px solid var(--purple-1);
+    background-color: transparent;
+    padding: 1.5rem 4rem;
+    font-size: 36px;
+    color: var(--purple-1);
+    font-family: 'Arial';
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-weight: 300;
+    border-radius: 1rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }

@@ -4,52 +4,40 @@ import { GameContext, SetGameContext } from "./GameContext";
 import GameInputHandler from "./GameInputHandler";
 import { loadRoomAssets } from "../gameData/gameDataHelper";
 import { useGetGameData } from "../hooks/GameDataHelper";
+import Preloader from "../common/Preloader";
 
 export default function GameManager() {
-    const [loaded, setLoaded] = useState(false);
-    const [gameState, setGameState] = useState({});
-    const getGameData = useGetGameData();
+    const [gameState, setGameState] = useState(
+        () => JSON.parse(localStorage.getItem('gameState')) 
+    );
 
-    useEffect(() => {
-        const init = async () => {
-            const gameData = (await getGameData()).data;
-            await Promise.all(gameData.rooms.flatMap(room => loadRoomAssets(room)));
+    const updateGameState = (newState) => {
+        setGameState(newState)
+        localStorage.setItem('gameState', JSON.stringify(newState))
+    }
 
+    const setState = (gameData) => {
+        const localState = localStorage.getItem('gameState');
+
+        if (!localState) {
             setGameState({
                 ...gameData,
+                ...gameState,
                 room: gameData.rooms[0].id,
                 inventory: []
-            });
-            
-            setLoaded(true);
+            })
         }
-
-        init();
-
-        return () => {
-        }
-
-    }, []);
-
-    const saveGameState = () => {
-        const { rooms, version, room } = gameState;
-        localStorage.setItem('gameState', JSON.stringify({
-            rooms: rooms,
-            version: version,
-            room: room
-        }));
     }
 
     return (
-        <>
-            {loaded && (
-                <GameContext.Provider value={gameState}>
-                    <SetGameContext.Provider value={setGameState}>
-                        <GameCanvas />
-                        <GameInputHandler />
-                    </SetGameContext.Provider>
-                </GameContext.Provider>
-            )}
-        </>
+        <GameContext.Provider value={gameState}>
+            <SetGameContext.Provider value={updateGameState}>
+                <Preloader playBtn={true} setState={setState}>
+                    <GameCanvas />
+                </Preloader>
+                <GameInputHandler />
+
+            </SetGameContext.Provider>
+        </GameContext.Provider>
     );
 }

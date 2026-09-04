@@ -4,8 +4,10 @@ import { GameContext, SetGameContext } from "./GameContext";
 import { gameData } from "../gameData/gameData";
 import { getImage } from "../gameData/images";
 import { AccentScreen } from "../gameTypes/AccentScreen";
-import { showOnScreen } from "../gameData/gameDataHelper";
+import { getCenter, showOnScreen } from "../gameData/gameDataHelper";
 import { Animation } from "../gameTypes/LevelObjects";
+import { hasArea } from "../gameData/Interactables";
+import { cursorImages } from "../gameData/cursors";
 
 let canvas;
 export let ctx;
@@ -16,6 +18,7 @@ let interactables = [];
 let features = [];
 let transitionAnim;
 let backgroundAnim;
+let touchMode = false;
 
 export const imgDimensions = { 
     width: screen.width * window.devicePixelRatio, 
@@ -114,6 +117,27 @@ const renderLoop = (time) => {
                 imgHeight
             );
         }
+
+        if (i.objectType === 'MovePoint' && touchMode && i.touchVisible) {
+            const icon = getImage(cursorImages[i.icon]);
+            const iconWidth = icon.width / imgDimensions.height * 1.5;
+            const iconHeight = icon.height / imgDimensions.height * 1.5;
+            const { x, y } = getCenter(i.points);
+
+            ctx.globalAlpha = 0.75;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(i.angle * Math.PI / 180);
+            ctx.drawImage(
+                icon,
+                x - iconWidth / 2,
+                y - iconHeight / 2,
+                iconWidth,
+                iconHeight
+            );
+            ctx.restore();
+            ctx.globalAlpha = 1;
+        }
     }
 
     for (const f of features) {
@@ -179,12 +203,12 @@ export default function GameCanvas() {
     }, []);
 
     useEffect(() => {
+        console.log(gameState);
         const room = gameState.rooms.find(r => r.id === gameState.room);
         const background = room.interactables.find(i => i.objectType === 'Background');
 
         if (background) {
             backgroundAnim = initializeAnimation(background.frames);
-            console.log(background.frames);
             roomBackground = getImage(background.frames.frames[0]);
             sizeImage();
         }
@@ -211,6 +235,8 @@ export default function GameCanvas() {
         if (room.features) {
             features = [...room.features];
         }
+
+        touchMode = gameState.touchMode;
         
         let unsubscribe = () => {};
 
@@ -218,7 +244,6 @@ export default function GameCanvas() {
             transitionAnim = initializeAnimation(gameState.transitionAnim);
 
             unsubscribe = transitionAnim.on('end', () => {
-                console.log('in the end callback');
                 setGameState({
                     ...gameState,
                     transitionAnim: null
