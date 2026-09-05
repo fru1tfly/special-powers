@@ -17,12 +17,9 @@ export default function GameManager() {
     }
 
     const setState = (gameData) => {
-        const localState = localStorage.getItem('gameState');
-
-        if (!localState || gameData.version > localState.version) {
+        if (!gameState || gameData.version > gameState.version) {
             setGameState({
                 ...gameData,
-                ...gameState,
                 room: gameData.rooms[0].id,
                 inventory: []
             })
