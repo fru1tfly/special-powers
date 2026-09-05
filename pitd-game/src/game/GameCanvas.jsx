@@ -118,8 +118,8 @@ const renderLoop = (time) => {
             );
         }
 
-        if (i.objectType === 'MovePoint' && touchMode && i.touchVisible && !transitionAnim) {
-            const icon = getImage(cursorImages[i.icon]);
+        if (touchMode && ((i.objectType === 'MovePoint' && i.touchVisible) || i.objectType === 'Door') && !transitionAnim) {
+            const icon = i.icon ? getImage(cursorImages[i.icon]) : getImage('door.png');
             const iconWidth = icon.width / imgDimensions.height * 1.5;
             const iconHeight = icon.height / imgDimensions.height * 1.5;
             const { x, y } = getCenter(i.points);
