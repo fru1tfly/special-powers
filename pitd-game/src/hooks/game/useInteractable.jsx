@@ -40,6 +40,15 @@ export function useInteractable() {
                 });
                 return true;
             }
+            case 'MovePoint': {
+                setGameState({
+                    ...gameState,
+                    room: interactable.destination,
+                    transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null
+                });
+                
+                return true;
+            }
         }
     }
 

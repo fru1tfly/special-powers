@@ -126,8 +126,6 @@ const renderLoop = (time) => {
 
             ctx.globalAlpha = 0.75;
             ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(i.angle * Math.PI / 180);
             ctx.drawImage(
                 icon,
                 x - iconWidth / 2,
