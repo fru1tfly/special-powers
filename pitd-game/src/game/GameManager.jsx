@@ -19,7 +19,7 @@ export default function GameManager() {
     const setState = (gameData) => {
         const localState = localStorage.getItem('gameState');
 
-        if (!localState) {
+        if (!localState || gameData.version > localState.version) {
             setGameState({
                 ...gameData,
                 ...gameState,
