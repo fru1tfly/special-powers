@@ -14,7 +14,6 @@ let currentRoom;
 export const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
 
 const sizeImage = () => {
-    if (!roomBackground) return;
     const imgAspectRatio = roomBackground.width / roomBackground.height;
     const canvasAspectRatio = canvas.width / canvas.height;
 
