@@ -23,7 +23,7 @@ const server = http.createServer(app);
 app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '1gb' }));
 
 const fileRouter = Router();
 fileRouter.post(
