@@ -152,8 +152,7 @@ export default function EditorModal() {
 
             case 'transitionTypes': {
                 return [
-                    (<option>--Select--</option>),
-                    ['sprites', 'fade'].map(tType => {
+                    ['none', 'sprites', 'fade'].map(tType => {
                         const opts = {};
                         if (selectedInteractable[formValue] === tType) {
                             opts['selected'] = 'selected';

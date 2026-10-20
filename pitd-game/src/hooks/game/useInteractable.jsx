@@ -10,12 +10,20 @@ export function useInteractable() {
             case 'Door': {
                 if (!interactable.isLocked || gameState.inventory.includes(interactable.key)) {
 
-                    setGameState({
-                        ...gameState,
-                        transitionDest: interactable.destination,
-                        transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null,
-                        transitionFade: interactable.transitionFade ?? null
-                    });
+                    if (!interactable.transitionType) {
+                        setGameState({
+                            ...gameState,
+                            room: interactable.destination
+                        })
+                    } else {
+
+                        setGameState({
+                            ...gameState,
+                            transitionDest: interactable.destination,
+                            transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null,
+                            transitionFade: interactable.transitionFade ?? null
+                        });
+                    }
                     
                     return true;
                 } else {
@@ -41,13 +49,21 @@ export function useInteractable() {
                 return true;
             }
             case 'MovePoint': {
-                setGameState({
-                    ...gameState,
-                    transitionDest: interactable.destination,
-                    transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null,
-                    transitionFade: interactable.transitionFade ?? null
-                });
-                
+                if (!interactable.transitionType) {
+                    setGameState({
+                        ...gameState,
+                        room: interactable.destination
+                    })
+                } else {
+
+                    setGameState({
+                        ...gameState,
+                        transitionDest: interactable.destination,
+                        transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null,
+                        transitionFade: interactable.transitionFade ?? null
+                    });
+                }
+            
                 return true;
             }
         }
