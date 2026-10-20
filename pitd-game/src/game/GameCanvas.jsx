@@ -2,10 +2,10 @@ import { setDimensions } from "../stores/dimensions";
 import { useRef, useEffect, useContext } from "react";
 import { GameContext, SetGameContext } from "./GameContext";
 import { gameData } from "../gameData/gameData";
-import { getImage } from "../gameData/images";
+import { getImage } from "../gameData/assetManager";
 import { AccentScreen } from "../gameTypes/AccentScreen";
 import { getCenter, showOnScreen } from "../gameData/gameDataHelper";
-import { Animation } from "../gameTypes/LevelObjects";
+import { Animation, Fade } from "../gameTypes/LevelObjects";
 import { hasArea } from "../gameData/Interactables";
 import { cursorImages } from "../gameData/cursors";
 
@@ -17,6 +17,7 @@ let openArt = null;
 let interactables = [];
 let features = [];
 let transitionAnim;
+let transitionFade;
 let backgroundAnim;
 let touchMode = false;
 
@@ -95,7 +96,7 @@ const renderLoop = (time) => {
     ctx.scale(imgDimensions.height, imgDimensions.height);
 
     for (const i of interactables) {
-        if (showOnScreen(i)) {
+        if (showOnScreen(i) && !transitionAnim) {
             let intImage;
 
             if (i.frames) {
@@ -154,6 +155,21 @@ const renderLoop = (time) => {
         }
     }
 
+    if (transitionFade) {
+        ctx.globalAlpha = transitionFade.getOpacity();
+
+        ctx.fillStyle = transitionFade.color;
+        ctx.fillRect(
+            imgDimensions.xOffset - canvas.width / 2,
+            imgDimensions.yOffset - canvas.height / 2,
+            imgDimensions.width,
+            imgDimensions.height
+        );
+
+        ctx.globalAlpha = 1;
+        transitionFade.update(dt);
+    }
+
 
     ctx.restore();
 
@@ -201,7 +217,6 @@ export default function GameCanvas() {
     }, []);
 
     useEffect(() => {
-        console.log(gameState);
         const room = gameState.rooms.find(r => r.id === gameState.room);
         const background = room.interactables.find(i => i.objectType === 'Background');
 
@@ -236,21 +251,47 @@ export default function GameCanvas() {
 
         touchMode = gameState.touchMode;
         
-        let unsubscribe = () => {};
+        let listeners = [];
 
         if (gameState.transitionAnim) {
             transitionAnim = initializeAnimation(gameState.transitionAnim);
 
-            unsubscribe = transitionAnim.on('end', () => {
+            listeners.push(transitionAnim.on('end', () => {
                 setGameState({
                     ...gameState,
-                    transitionAnim: null
+                    room: gameState.transitionDest,
+                    transitionAnim: null,
+                    transitionDest: null
                 });
                 transitionAnim = null;
-            })
+            }));
         }
 
-        return unsubscribe;
+        if (gameState.transitionFade) {
+            if (!transitionFade) {
+                transitionFade = initializeFade(gameState.transitionFade);
+            }
+
+            listeners.push(transitionFade.on('end', () => {
+                setGameState({
+                    ...gameState,
+                    transitionFade: null,
+                });
+                transitionFade = null;
+            }));
+
+            listeners.push(transitionFade.on('roomchange', () => {
+                setGameState({
+                    ...gameState,
+                    room: gameState.transitionDest,
+                    transitionDest: null
+                });
+            }));
+        }
+
+        return () => {
+            listeners.forEach(l => l());
+        };
         
     }, [gameState]);
 
@@ -267,4 +308,14 @@ function initializeAnimation(anim) {
     newAnim.timesToPlay = anim.timesToPlay;
 
     return newAnim;
+}
+
+function initializeFade(fade) {
+    const newFade = new Fade();
+    newFade.steps = fade.steps;
+    newFade.color = fade.color;
+    newFade.stall = fade.stall;
+    newFade.fps = fade.fps;
+
+    return newFade;
 }

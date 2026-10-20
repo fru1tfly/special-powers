@@ -12,13 +12,13 @@ export function useInteractable() {
 
                     setGameState({
                         ...gameState,
-                        room: interactable.destination,
-                        transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null
+                        transitionDest: interactable.destination,
+                        transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null,
+                        transitionFade: interactable.transitionFade ?? null
                     });
                     
                     return true;
                 } else {
-                    console.log("it's locked");
                     return false;
                 }
             }
@@ -43,8 +43,9 @@ export function useInteractable() {
             case 'MovePoint': {
                 setGameState({
                     ...gameState,
-                    room: interactable.destination,
-                    transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null
+                    transitionDest: interactable.destination,
+                    transitionAnim: interactable.assets.length > 0 ? interactable.transitionFrames : null,
+                    transitionFade: interactable.transitionFade ?? null
                 });
                 
                 return true;

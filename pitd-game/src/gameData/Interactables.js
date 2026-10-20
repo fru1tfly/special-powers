@@ -12,15 +12,32 @@ export const interactableFormValues = {
             name: 'Locked?',
             type: 'checkbox'
         },
+        
+        transitionType: {
+            name: 'Transition Type',
+            type: 'dropdown',
+            options: 'transitionTypes'
+        },
+
+        transitionFrames: {
+            name: 'Transition',
+            type: 'animation',
+            visibleFunc: (val) => val === 'sprites',
+            visible: 'transitionType'
+        },
+
+        transitionFade: {
+            name: 'Transition',
+            type: 'fade',
+            visibleFunc: (val) => val === 'fade',
+            visible: 'transitionType'
+        },
+        
         key: {
             name: 'Key',
             visible: 'isLocked',
             type: 'dropdown',
             options: 'keys'
-        },
-        transitionFrames: {
-            name: 'Transition',
-            type: 'animation'
         }
     },
     MovePoint: {
@@ -38,14 +55,24 @@ export const interactableFormValues = {
             options: 'cursors'
         },
         
-        touchVisible: {
-            name: 'Display Icon on Mobile?',
-            type: 'checkbox'
+        transitionType: {
+            name: 'Transition Type',
+            type: 'dropdown',
+            options: 'transitionTypes'
         },
 
         transitionFrames: {
             name: 'Transition',
-            type: 'animation'
+            type: 'animation',
+            visibleFunc: (val) => val === 'sprites',
+            visible: 'transitionType'
+        },
+
+        transitionFade: {
+            name: 'Transition',
+            type: 'fade',
+            visibleFunc: (val) => val === 'fade',
+            visible: 'transitionType'
         }
     },
     Key: {

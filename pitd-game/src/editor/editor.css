@@ -37,7 +37,7 @@ canvas {
     cursor: grabbing!important;
 }
 
-button, .uploadLabel {
+button, .uploadLabel, .div-btn {
     font-size: 14px;
     font-weight:700;
     background: #6e1010;
@@ -86,13 +86,17 @@ input[type="text"], input[type="number"], select {
 
 .section-container {
     border: 2px solid black;
-    flex-grow: 1;
+    flex-grow: 2;
     min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     padding: 0.25rem;
+}
+
+.section-container-small {
+    flex-grow: 1;
 }
 
 .section-item {
@@ -127,7 +131,7 @@ input[type="text"], input[type="number"], select {
     left: 25vw;
 
     border: 2px solid black;
-    background-color: rgba(161, 161, 161, 0.5);
+    background-color: rgba(161, 161, 161, 0.8);
     padding: 2rem;
     box-sizing: border-box;
 
@@ -340,4 +344,200 @@ input[type="text"], input[type="number"], select {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#waveform {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.audio-btn {
+    width: 20px;
+    height: 16px;
+    user-select: none;
+}
+
+div::part(region-content) {
+    color: #fff;
+    font-weight:600;
+}
+
+input[type="range"] {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    -webkit-appearance: none; /* Hides default slider in WebKit */
+    appearance: none;
+    background: transparent; /* Prevents default background rendering */
+    flex-grow: 1;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Overrides default style */
+  appearance: none;
+  margin-top: -6px; /* Centers the thumb vertically over the 8px track */
+  background-color: #6e1010;
+  height: 20px;
+  width: 50px;
+  border: 2px solid #000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.fader {
+    margin-top: 22px;
+    display: flex;
+    flex-direction: column;
+}
+
+.fader > label {
+    text-align: center;
+}
+
+.audio-row {
+    display: flex;
+    flex-grow: 1;
+    margin-bottom: 10px;
+    gap: 10px;
+    min-height: 0;
+}
+
+.audio-effect-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+}
+
+.effect-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.effect-section {
+    background-color: rgba(0, 0, 0, 0.3);
+    flex-grow: 1;
+    padding: 10px;
+    min-height: 0;
+    flex-shrink: 1;
+    overflow-y: auto;
+}
+
+.effects-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.active-btn {
+    background-color: rgb(206, 136, 15);
+}
+
+.effect-menu {
+    border: 2px solid black;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fx-filter-bg {
+    background-color: rgba(39, 101, 155, 0.6);
+}
+
+
+.fx-reverb-bg {
+    background-color: rgba(215, 221, 91, 0.6);
+}
+
+
+.fx-delay-bg {
+    background-color: rgba(155, 113, 203, 0.6);
+}
+
+
+.fx-chorus-bg {
+    background-color: rgba(96, 185, 182, 0.6);
+}
+
+
+.fx-distort-bg {
+    background-color: rgba(201, 72, 36, 0.6);
+}
+
+
+.fx-bitcrush-bg {
+    background-color: rgba(64, 208, 76, 0.6);
+}
+
+.fx-gain-bg {
+    background-color: rgba(201, 124, 36, 0.6);
+}
+
+.fadePreview {
+    background-color: #000;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.effect-params {
+    display: flex;
+    gap: 20px;
+}
+
+.effect-param {
+    display: flex;
+    flex-direction: column;
+}
+
+.multipick-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.multipick-section {
+    flex-grow: 1;
+}
+
+.multipick-select {
+    padding: 0.25rem;
+    width: 100%;
+}
+
+.multipick-negative {
+    background-color: rgba(201, 36, 36, 0.6);
+}
+
+.multipick-positive {
+    background-color: rgba(64, 208, 76, 0.6);
+}
+
+.multipick-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.multipick-item {
+    font-weight: 700;
+    padding: 0.25rem;
+}
+
+.multipick-item:disabled {
+    color: #fff;
+}
+
+.big-button {
+    background-color: #7C425B;
+    font-size: 1.5rem;
+    padding: 1rem;
+    cursor: pointer;
 }

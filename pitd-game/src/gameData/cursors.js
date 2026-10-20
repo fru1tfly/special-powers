@@ -1,4 +1,4 @@
-import { addImage } from "./images";
+import { addImage } from "./assetManager";
 
 export const cursors = {
     'main': `url("${import.meta.env.BASE_URL}cursor.png"), auto`,

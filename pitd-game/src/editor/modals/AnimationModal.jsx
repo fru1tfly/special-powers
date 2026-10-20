@@ -1,10 +1,10 @@
-import { EditorContext, SetEditorContext } from './EditorContext';
+import { EditorContext, SetEditorContext } from '../EditorContext';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useUploadFile } from '../hooks/files/useUploadFile';
-import { useGetInteractable, useUpdateInteractable } from "../hooks/editor/InteractableHelper";
-import AnimationCanvas from './AnimationCanvas';
-import { Animation } from '../gameTypes/LevelObjects';
-import { addImage } from '../gameData/images';
+import { useUploadFile } from '../../hooks/files/useUploadFile';
+import { useGetInteractable, useUpdateInteractable } from "../../hooks/editor/InteractableHelper";
+import AnimationCanvas from '../AnimationCanvas';
+import { Animation } from '../../gameTypes/LevelObjects';
+import { addImage } from '../../gameData/assetManager';
 
 export default function AnimationModal({ animatedField, closeModal }) {
     const editorState = useContext(EditorContext);
@@ -147,9 +147,10 @@ export default function AnimationModal({ animatedField, closeModal }) {
     }
 
     const saveAnimation = () => {
+        console.log(animation.getDefinition());
         updateInteractable({
             ...selectedInteractable,
-            [animatedField]: animation
+            [animatedField]: animation.getDefinition()
         });
         closeModal();
     }

@@ -1,14 +1,15 @@
-import { EditorContext, SetEditorContext } from "./EditorContext";
+import { EditorContext, SetEditorContext } from "../EditorContext";
 import { useContext, useEffect, useState, useSyncExternalStore } from "react";
-import { interactableFormValues } from "../gameData/Interactables";
-import { useUploadFile } from "../hooks/files/useUploadFile";
-import { startShapeMode, shapeModeSubscribe, getShapeMode, cameraOffset, startMoveMode, moveModeSubscribe, getMoveMode, on } from "./EditorInputHandler";
-import { useGetInteractable, useUpdateInteractable } from "../hooks/editor/InteractableHelper";
-import { Vector2 } from "../gameTypes/Vector";
-import { addImage } from "../gameData/images";
+import { interactableFormValues } from "../../gameData/Interactables";
+import { useUploadFile } from "../../hooks/files/useUploadFile";
+import { startShapeMode, shapeModeSubscribe, getShapeMode, cameraOffset, startMoveMode, moveModeSubscribe, getMoveMode, on } from "../EditorInputHandler";
+import { useGetInteractable, useUpdateInteractable } from "../../hooks/editor/InteractableHelper";
+import { Vector2 } from "../../gameTypes/Vector";
+import { addImage } from "../../gameData/assetManager";
 import AnimationModal from "./AnimationModal";
-import { cursorImages, cursors } from "../gameData/cursors";
-import { hasArea, hasPosition } from "../gameData/Interactables";
+import { cursorImages, cursors } from "../../gameData/cursors";
+import { hasArea, hasPosition } from "../../gameData/Interactables";
+import FadeModal from "./FadeModal";
 
 const TYPES = {
     '--None--': '',
@@ -28,7 +29,10 @@ export default function EditorModal() {
     const moveMode = useSyncExternalStore(moveModeSubscribe, getMoveMode);
 
     const [animMode, setAnimMode] = useState(false);
+    const [fadeMode, setFadeMode] = useState(false);
+
     const [animField, setAnimField] = useState('');
+    const [fadeField, setFadeField] = useState('');
 
     const { uploadFile } = useUploadFile();
 
@@ -145,6 +149,19 @@ export default function EditorModal() {
                     })
                 ];
             }
+
+            case 'transitionTypes': {
+                return [
+                    (<option>--Select--</option>),
+                    ['sprites', 'fade'].map(tType => {
+                        const opts = {};
+                        if (selectedInteractable[formValue] === tType) {
+                            opts['selected'] = 'selected';
+                        }
+                        return (<option {...opts} value={tType}>{tType}</option>)
+                    })
+                ]
+            }
         }
     }
 
@@ -234,8 +251,17 @@ export default function EditorModal() {
         setAnimMode(true);
     }
 
+    const handleEditFade = (fieldName) => {
+        setFadeField(fieldName);
+        setFadeMode(true);
+    }
+
     const handleCloseAnimation = () => {
         setAnimMode(false);
+    }
+
+    const handleCloseFade = () => {
+        setFadeMode(false);
     }
 
     return shapeMode ? (
@@ -271,6 +297,8 @@ export default function EditorModal() {
         </div>
     ) : animMode ? (
         <AnimationModal animatedField={animField} closeModal={handleCloseAnimation} />
+    ) : fadeMode ? (
+        <FadeModal fadeField={fadeField} closeModal={handleCloseFade} />
     ) : (
         <div className="editor-modal">
             <div className="modal-body">
@@ -292,7 +320,11 @@ export default function EditorModal() {
                             const def = interactableFormValues[selectedInteractable.objectType][formValue];
                             if (typeof def === 'boolean') return;
 
-                            if (def.visible && !selectedInteractable[def.visible]) {
+                            if (def.visible && !def.visibleFunc && !selectedInteractable[def.visible]) {
+                                return;
+                            }
+
+                            if (def.visible && def.visibleFunc && !def.visibleFunc(selectedInteractable[def.visible])) {
                                 return;
                             }
 
@@ -356,6 +388,12 @@ export default function EditorModal() {
                                             </>
                                         )}
 
+                                        {def.type === 'fade' && (
+                                            <>
+                                                <button onClick={() => handleEditFade(formValue)}>Edit Fade</button>
+                                            </>
+                                        )}
+
                                         {def.options === 'cursors' && 
                                             <div className="form-icon-container">
                                                 {selectedInteractable[formValue] && 
@@ -367,7 +405,6 @@ export default function EditorModal() {
                                             </div>
                                         }
                                     </div>
-                                    
                                 </>
                             )
                         })

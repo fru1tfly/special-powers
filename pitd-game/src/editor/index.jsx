@@ -5,7 +5,7 @@ import EditorMenu from './EditorMenu'
 import { EditorContext, SetEditorContext } from './EditorContext'
 
 import './editor.css'
-import EditorModal from './EditorModal'
+import EditorModal from './modals/EditorModal'
 import { EditorInputHandler } from './EditorInputHandler'
 
 import { getRoomAssetCount, loadRoomAssets } from '../gameData/gameDataHelper'
@@ -18,6 +18,7 @@ export default function Editor() {
     const [editorState, setEditorState] = useState(
         () => JSON.parse(localStorage.getItem('editorState')) ?? {
             rooms: [],
+            songs: [],
             selectedRoom: '',
             selectedInteractable: null
         }
@@ -53,6 +54,8 @@ export default function Editor() {
                         ( 
                             <div className="help-text">
                                 <div className="help-text-item">
+                                    <span className="key-control">Ctrl</span>
+                                    <span className="instruction-text">+</span>
                                     <span className="control-icon"><img src={`${import.meta.env.BASE_URL}scroll.png`} /></span>
                                     <span className="instruction-text">Scroll to Zoom</span>
                                 </div>

@@ -3,7 +3,7 @@ import { EditorContext, SetEditorContext } from "./EditorContext";
 import { cameraOffset, movingObject, zoomValue } from "./EditorInputHandler";
 import { setDimensions } from "../stores/dimensions";
 import { tempNodes } from "../stores/tempData";
-import { getImage } from "../gameData/images";
+import { getImage } from "../gameData/assetManager";
 
 let canvas;
 export let ctx;

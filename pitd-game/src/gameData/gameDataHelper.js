@@ -1,7 +1,7 @@
 import { gameData } from "./gameData";
 import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
-import { addImage } from "./images";
+import { addImage } from "./assetManager";
 import { imgDimensions } from "../game/GameCanvas";
 import { hasPosition } from "./Interactables";
 
@@ -88,6 +88,7 @@ export function pointInShape(point, shape) {
 }
 
 export function inImageBounds(point, image, origin) {
+    if (!image) return false;
     const scaleFactor = imgDimensions.height / window.devicePixelRatio;
     const imgWidth = image.width / scaleFactor;
     const imgHeight = image.height / scaleFactor;

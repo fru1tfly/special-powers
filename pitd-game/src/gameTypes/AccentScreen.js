@@ -1,4 +1,4 @@
-import { getImage } from "../gameData/images";
+import { getImage } from "../gameData/assetManager";
 import { canvasHeight } from "../stores/dimensions";
 import { ctx } from "../game/GameCanvas";
 

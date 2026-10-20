@@ -3,7 +3,7 @@ import { cursors } from "../gameData/cursors";
 import { GameContext, SetGameContext } from "./GameContext";
 import { getRoom, hasFeature, inImageBounds, pointInShape, screenToWorld, showOnScreen } from "../gameData/gameDataHelper";
 import { useInteractable } from "../hooks/game/useInteractable";
-import { getImage } from "../gameData/images";
+import { getImage } from "../gameData/assetManager";
 
 export default function GameInputHandler() {
     const [cursorState, setCursorState] = useState('main');
@@ -29,7 +29,7 @@ export default function GameInputHandler() {
         }
 
         const handleMouseMove = (event) => {
-            if (gameState.transitionAnim) return;
+            if (gameState.transitionAnim || gameState.transitionFade) return;
 
             const mousePoint = screenToWorld(event.clientX, event.clientY);
 

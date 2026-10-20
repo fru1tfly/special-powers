@@ -1,5 +1,5 @@
 import { Feature } from './LevelObjects';
-import { getImage } from "../gameData/images"
+import { getImage } from "../gameData/assetManager"
 import { canvasHeight, canvasWidth } from "../stores/dimensions"
 
 class Dirt {

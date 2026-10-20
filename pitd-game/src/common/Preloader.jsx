@@ -1,6 +1,7 @@
 import { useGetGameData } from "../hooks/GameDataHelper";
 import { useState, useEffect } from "react";
 import { getRoomAssetCount, loadRoomAssets } from "../gameData/gameDataHelper";
+import { addAudio } from "../gameData/assetManager";
 
 export default function Preloader({ playBtn, setState, children }) {
     const getGameData = useGetGameData();
@@ -14,11 +15,11 @@ export default function Preloader({ playBtn, setState, children }) {
     useEffect(() => {
         let cancelled = false;
 
-        const loadAssets = async (rooms) => {
-            const count = rooms.reduce(
+        const loadAssets = async (data) => {
+            const count = data.rooms.reduce(
                 (total, room) => total + getRoomAssetCount(room),
                 0
-            );
+            ) + data.startingSong ? 1 : 0;
 
             setAssetCount(count);
             setAssetLoaded(0);
@@ -29,7 +30,10 @@ export default function Preloader({ playBtn, setState, children }) {
                 }
             }
 
-            await Promise.all(rooms.flatMap(room => loadRoomAssets(room, incrementLoadedCount)));
+            if (data.startingSong) {
+                await addAudio(data.startingSong);
+            }
+            await Promise.all(data.rooms.flatMap(room => loadRoomAssets(room, incrementLoadedCount)));
         }
 
         const init = async () => {
@@ -43,7 +47,7 @@ export default function Preloader({ playBtn, setState, children }) {
                 return;
             }
 
-            await loadAssets(gData.rooms);
+            await loadAssets(gData);
 
             if (!cancelled) {
                 setLoaded(true);

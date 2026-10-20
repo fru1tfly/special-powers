@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { cursors } from "../gameData/cursors";
-import { getImage } from "../gameData/images";
+import { getImage } from "../gameData/assetManager";
 import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
 import { tempNodes, resetTempNodes } from "../stores/tempData";
@@ -73,6 +73,8 @@ let moveModeUpdated = false;
 
 let dragOrigin = { x: 0, y: 0 };
 let cameraOrigin = { x: 0, y: 0 };
+
+let controlDown = false;
 
 function stopShapeMode() {
     removeInputState('placing');
@@ -235,6 +237,11 @@ const handleKeyDown = (event) => {
             }
         }
 
+        case 'Control': {
+            controlDown = true;
+            console.log('heyyyyyyyy');
+        }
+
     }
 }
 
@@ -243,17 +250,22 @@ const handleKeyUp = (event) => {
         case ' ':
             removeInputState('dragMode');
             break;
+        case 'Control': 
+            controlDown = false;
+            break;
     }
 }
 
 const handleWheel = (event) => {
-    let newZoomValue = zoomValue - event.deltaY / 2e2;
-    if (newZoomValue < 1) {
-        newZoomValue = 1;
-    } else if (newZoomValue > 10) {
-        newZoomValue = 10;
+    if (controlDown) {
+        let newZoomValue = zoomValue - event.deltaY / 2e2;
+        if (newZoomValue < 1) {
+            newZoomValue = 1;
+        } else if (newZoomValue > 10) {
+            newZoomValue = 10;
+        }
+        zoomValue = newZoomValue;
     }
-    zoomValue = newZoomValue;
 }
 
 const screenToWorld = (x, y) => {
