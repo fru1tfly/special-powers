@@ -137,11 +137,12 @@ export default function SongModal({ song, closeModal }) {
     return audioMode ? (
         <AudioModal
             context={{
-                url: existingSong.audio.url,
+                url: audio.url,
                 level: 'song',
                 field: 'audio'
             }}
-            closeModal={() => {
+            closeModal={(newAudio) => {
+                setAudio(newAudio);
                 setAudioMode(false);
             }}
         />

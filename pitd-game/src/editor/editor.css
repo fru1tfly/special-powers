@@ -97,6 +97,7 @@ input[type="text"], input[type="number"], select {
 
 .section-container-small {
     flex-grow: 1;
+    min-height: 20vh;
 }
 
 .section-item {

@@ -50,7 +50,7 @@ export default function Editor() {
                     {editorState.selectedInteractable &&
                         <EditorModal/>
                     }
-                    {!editorState.selectedInteractable &&
+                    {!editorState.selectedInteractable && !editorState.selectedSong &&
                         ( 
                             <div className="help-text">
                                 <div className="help-text-item">

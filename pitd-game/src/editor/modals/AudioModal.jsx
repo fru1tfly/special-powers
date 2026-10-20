@@ -352,7 +352,7 @@ export default function AudioModal({ context, closeModal }) {
         })
         
         
-        closeModal();
+        closeModal(audio);
     }
 
     const handleLevelChange = (event) => {
