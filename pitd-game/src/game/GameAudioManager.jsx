@@ -49,7 +49,7 @@ async function playSong(song) {
     if (audio.trimRegion && !audio.loop) {
         duration = audio.trimRegion
             ? audio.trimRegion.end - audio.trimRegion.start
-            : songDefinition.player.sampleTime;
+            : songDefinition.player.buffer.duration;
     } 
 
     songDefinition.player.start(
