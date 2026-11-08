@@ -24,8 +24,6 @@ export async function addRoomSongs(roomId, songs) {
         const songInRoom = song.rooms.filter(r => r === roomId).length === 1;
         const songInStack = songStack.filter(s => s.id === song.id).length === 1;
 
-        console.log(songInRoom, songInStack);
-
         if (songInRoom && !songInStack) {
             await playSong(song);
             songStack.unshift(song);

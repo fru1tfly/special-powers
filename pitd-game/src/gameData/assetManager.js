@@ -54,13 +54,9 @@ export const addSong = (song) => {
     return new Promise(async (resolve, reject) => {
         const player = new Tone.Player(`${import.meta.env.VITE_DOMAIN}${song.audio.url}`);
         player.loop = true;
-
-        console.log(song.audio.loop, song.audio.trimRegion, song.audio.loopPoint, song.audio.trimRegion.end);
-
         player.playbackRate = song.audio.speed;
 
         if (song.audio.trimRegion != null) {
-            console.log('asdfb');
             player.seek(song.audio.trimRegion.start);
 
             if (song.audio.loop) {
@@ -102,7 +98,6 @@ export const addSong = (song) => {
 }
 
 export const getSong = (id) => {
-    console.log(id, SONGS, SONGS[id]);
     if (!SONGS[id]) {
         return null;
     }

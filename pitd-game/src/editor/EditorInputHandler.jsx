@@ -239,9 +239,7 @@ const handleKeyDown = (event) => {
 
         case 'Control': {
             controlDown = true;
-            console.log('heyyyyyyyy');
         }
-
     }
 }
 

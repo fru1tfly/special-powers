@@ -147,7 +147,6 @@ export default function AnimationModal({ animatedField, closeModal }) {
     }
 
     const saveAnimation = () => {
-        console.log(animation.getDefinition());
         updateInteractable({
             ...selectedInteractable,
             [animatedField]: animation.getDefinition()

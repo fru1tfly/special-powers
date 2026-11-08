@@ -32,7 +32,6 @@ export default function Preloader({ playBtn, setState, children }) {
             }
 
             data.songs.forEach(async (song) => {
-                console.log(song, 'GETTIN ADDED');
                 if (gameMode) {
                     await addSong(song);
                 } else {

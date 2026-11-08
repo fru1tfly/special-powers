@@ -293,8 +293,6 @@ export default function AudioModal({ context, closeModal }) {
 
         wavesurferRef.current.setPlaybackRate(speed, false);
 
-        console.log(trimRegionRef.current);
-
         if (
             trimRegionRef.current !== null && 
             (wavesurferRef.current.getCurrentTime() === trimRegionRef.current.end || 

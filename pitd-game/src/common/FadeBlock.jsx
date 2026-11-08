@@ -35,7 +35,6 @@ export default function FadeBlock({ fade, playing }) {
         fadeObject = fade;
         fadeDiv = fadeElement.current;
         isPlaying = playing;
-        console.log('woah mama', isPlaying);
     }, [fade, playing, fadeElement]);
 
     return (
