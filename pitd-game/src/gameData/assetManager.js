@@ -52,12 +52,13 @@ export const addAudio = (def, prefix = import.meta.env.VITE_DOMAIN, callback = (
 // Game Audio
 export const addSong = (song) => {
     return new Promise(async (resolve, reject) => {
-        const buffer = new Tone.Buffer(`${import.meta.env.VITE_DOMAIN}${song.audio.url}`);
-
-        SONGS[song.id] = {
-            buffer: buffer,
-            song: song
+        const res = await fetch(`${import.meta.env.VITE_DOMAIN}${song.audio.url}`);
+        SONGS[song.id] = { 
+            arrayBuffer: await res.arrayBuffer(), 
+            song 
         };
+        
+        resolve();
     });
 }
 
@@ -65,7 +66,8 @@ export const initializeAudio = async () => {
     for (const s of Object.values(SONGS)) {
         const song = s.song;
 
-        const player = new Tone.Player(s.buffer);
+        const audioBuffer = await Tone.getContext().decodeAudioData(s.arrayBuffer);
+        const player = new Tone.Player(new Tone.ToneAudioBuffer(audioBuffer));
         player.loop = true;
         player.playbackRate = song.audio.speed;
 
