@@ -2,6 +2,7 @@ import { useGetGameData } from "../hooks/GameDataHelper";
 import { useState, useEffect } from "react";
 import { getRoomAssetCount, loadRoomAssets } from "../gameData/gameDataHelper";
 import { addAudio, addSong } from "../gameData/assetManager";
+import * as Tone from 'tone';
 
 export default function Preloader({ playBtn, setState, children }) {
     const getGameData = useGetGameData();
