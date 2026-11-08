@@ -70,6 +70,7 @@ export default function Preloader({ playBtn, setState, children }) {
     }, []);
 
     const playGame = async () => {
+        await Tone.start();
         await initializeAudio();
         setPlaying(true);
     }
