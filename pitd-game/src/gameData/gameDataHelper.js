@@ -124,17 +124,23 @@ export function getCenter(points) {
 }
 
 export function cleanRoomData(rooms) {
-    return rooms.map(r => ({
-        ...r,
-        interactables: r.interactables.map(i => {
-            if (i.transitionType) {
-                return {
-                    ...cleanTransitionData(i, i.transitionType)
-                };
-            }
-            return i;
-        })
-    }))
+    return rooms.map(r => {
+        if (r.background) {
+            delete r.background;
+        }
+        
+        return {
+            ...r,
+            interactables: r.interactables.map(i => {
+                if (i.transitionType) {
+                    return {
+                        ...cleanTransitionData(i, i.transitionType)
+                    };
+                }
+                return i;
+            })
+        }
+    });
 }
 
 export function cleanTransitionData(interactable, currentType) {
