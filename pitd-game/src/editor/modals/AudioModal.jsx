@@ -199,9 +199,6 @@ export default function AudioModal({ context, closeModal }) {
             }
         }));
 
-        
-
-
         const stopSpace = (event) => event.preventDefault();
         playPauseBtn.current?.addEventListener('keydown', stopSpace);
 

@@ -8,6 +8,7 @@ import { getCenter, showOnScreen } from "../gameData/gameDataHelper";
 import { Animation, Fade } from "../gameTypes/LevelObjects";
 import { hasArea } from "../gameData/Interactables";
 import { cursorImages } from "../gameData/cursors";
+import { addRoomSongs } from "./GameAudioManager";
 
 let canvas;
 export let ctx;
@@ -20,6 +21,8 @@ let transitionAnim;
 let transitionFade;
 let backgroundAnim;
 let touchMode = false;
+
+let gameStarted = false;
 
 export const imgDimensions = { 
     width: screen.width * window.devicePixelRatio, 
@@ -219,6 +222,13 @@ export default function GameCanvas() {
     useEffect(() => {
         const room = gameState.rooms.find(r => r.id === gameState.room);
         const background = room.interactables.find(i => i.objectType === 'Background');
+
+        if (!gameStarted) {
+
+            addRoomSongs(gameState.room, gameState.songs);
+
+            gameStarted = true;
+        }
 
         if (background) {
             backgroundAnim = initializeAnimation(background.frames);

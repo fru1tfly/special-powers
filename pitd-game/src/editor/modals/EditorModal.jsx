@@ -10,6 +10,7 @@ import AnimationModal from "./AnimationModal";
 import { cursorImages, cursors } from "../../gameData/cursors";
 import { hasArea, hasPosition } from "../../gameData/Interactables";
 import FadeModal from "./FadeModal";
+import { cleanTransitionData } from "../../gameData/gameDataHelper";
 
 const TYPES = {
     '--None--': '',
@@ -91,10 +92,18 @@ export default function EditorModal() {
                 [varName]: event.target.checked
             })
         } else {
-            updateInteractable({
-                ...selectedInteractable,
-                [varName]: event.target.value
-            })
+            if (varName === 'transitionType') {
+                updateInteractable({
+                    ...cleanTransitionData(selectedInteractable, event.target.value),
+                    [varName]: event.target.value
+                })
+            } else {
+                updateInteractable({
+                    ...selectedInteractable,
+                    [varName]: event.target.value
+                })
+            }
+           
         }
     }
 

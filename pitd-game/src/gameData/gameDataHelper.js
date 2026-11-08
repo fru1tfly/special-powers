@@ -4,6 +4,7 @@ import { canvasWidth, canvasHeight } from "../stores/dimensions";
 import { addImage } from "./assetManager";
 import { imgDimensions } from "../game/GameCanvas";
 import { hasPosition } from "./Interactables";
+import { useUpdateInteractable } from "../hooks/editor/InteractableHelper";
 
 export function getRoom(rooms, roomId) {
     return rooms.find(r => r.id === roomId);
@@ -120,4 +121,16 @@ export function getCenter(points) {
         x: (maxX + minX) / 2,
         y: (maxY + minY) / 2
     }
+}
+
+export function cleanTransitionData(interactable, newType) {
+    if (newType !== 'sprites' && interactable.transitionFrames) {
+        delete interactable.transitionFrames;
+    }
+
+    if (newType !== 'fade' && interactable.transitionFade) {
+        delete interactable.transitionFade;
+    }
+
+    return { ...interactable };
 }

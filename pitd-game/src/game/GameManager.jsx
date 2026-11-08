@@ -5,14 +5,22 @@ import GameInputHandler from "./GameInputHandler";
 import { loadRoomAssets } from "../gameData/gameDataHelper";
 import { useGetGameData } from "../hooks/GameDataHelper";
 import Preloader from "../common/Preloader";
+import { addRoomSongs } from "./GameAudioManager";
 
 export default function GameManager() {
     const [gameState, setGameState] = useState(
         () => JSON.parse(localStorage.getItem('gameState')) 
     );
 
-    const updateGameState = (newState) => {
-        setGameState(newState)
+    const updateGameState = async (newState) => {
+        const oldGameState = gameState;
+
+        if (oldGameState.room !== newState.room) {
+            await addRoomSongs(newState.room, newState.songs);
+        }
+        setGameState(newState);
+
+        
         localStorage.setItem('gameState', JSON.stringify(newState))
     }
 
