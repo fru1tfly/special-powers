@@ -7,13 +7,14 @@ import { getImage } from "../gameData/assetManager";
 
 let canvas;
 export let ctx;
-let roomBackground;
+let roomBackgrounds = [];
 let shapes = [];
 let currentRoom;
 
 export const imgDimensions = { width: 0, height: 0, xOffset: 0, yOffset: 0 };
 
 const sizeImage = () => {
+    const roomBackground = roomBackgrounds[0];
     const imgAspectRatio = roomBackground.width / roomBackground.height;
     const canvasAspectRatio = canvas.width / canvas.height;
 
@@ -50,7 +51,7 @@ const renderLoop = async (time) => {
         ctx.scale(zoomValue, zoomValue);
         ctx.translate(cameraOffset.x, cameraOffset.y);
 
-        if (roomBackground) {
+        for (const roomBackground of roomBackgrounds) {
             ctx.drawImage(
                 roomBackground,
                 imgDimensions.xOffset - canvas.width / 2,
@@ -108,7 +109,7 @@ export default function EditorCanvas() {
 
             setDimensions(canvas.width, canvas.height);
 
-            if (roomBackground) {
+            if (roomBackgrounds.length > 0) {
                 sizeImage();
             }
         }
@@ -133,14 +134,17 @@ export default function EditorCanvas() {
         const roomData = editorState.rooms.find(r => r.id === currentRoom);
 
         if (roomData) {
-            const background = roomData.interactables.find(i => i.objectType === 'Background');
-            const imgSrc = background?.assets[0] ?? null;
+            const backgrounds = roomData.interactables.filter(i => i.objectType === 'Background');
 
-            if (imgSrc) {
-                roomBackground = getImage(imgSrc);
+            roomBackgrounds = [];
+            for (const bg of backgrounds) {
+                if (bg.assets.length > 0) {
+                    roomBackgrounds.push(getImage(bg.assets[0]));
+                }
+            }
+
+            if (roomBackgrounds.length > 0) {
                 sizeImage();
-            } else {
-                roomBackground = null;
             }
 
             shapes = [];
