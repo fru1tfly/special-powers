@@ -68,6 +68,11 @@ export default function Preloader({ playBtn, setState, children }) {
 
     }, []);
 
+    const playGame = () => {
+        setPlaying(true);
+        Tone.start();
+    }
+
     const progress = assetCount > 0
         ? (assetLoaded / assetCount) * 100
         : 0;
@@ -80,7 +85,7 @@ export default function Preloader({ playBtn, setState, children }) {
                 </div>
             }
             {loaded && !playing && playBtn &&
-                <button onClick={() => setPlaying(true)} className="play-btn">Play</button>
+                <button onClick={playGame} className="play-btn">Play</button>
             }
             {loaded && (playing || !playBtn) && children}
         </>

@@ -202,7 +202,7 @@ export default function SongModal({ song, closeModal }) {
                     <Multipicker
                         list={songRooms}
                         source={rooms}
-                        setList={(newList) => { console.log("updatin'"); setSongRooms(newList)}}
+                        setList={(newList) => { setSongRooms(newList)}}
                         title='Rooms'
                     />
                     
