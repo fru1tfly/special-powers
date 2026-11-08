@@ -69,9 +69,9 @@ export default function Preloader({ playBtn, setState, children }) {
 
     }, []);
 
-    const playGame = () => {
+    const playGame = async () => {
         setPlaying(true);
-        Tone.start();
+        await Tone.start();
     }
 
     const progress = assetCount > 0
