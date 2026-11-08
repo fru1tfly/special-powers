@@ -66,6 +66,8 @@ export const initializeAudio = async () => {
     for (const s of Object.values(SONGS)) {
         const song = s.song;
 
+        if (!s.arrayBuffer) continue;
+
         const audioBuffer = await Tone.getContext().decodeAudioData(s.arrayBuffer);
         const player = new Tone.Player(new Tone.ToneAudioBuffer(audioBuffer));
         player.loop = true;
@@ -92,19 +94,21 @@ export const initializeAudio = async () => {
 
         let previousNode = player.output;
 
-        for (const effect of song.audio.effects) {
-            const eff = new AudioEffect();
-            eff.params = { ...effect.params };
-            eff.setType(effect.type);
+        if (song.audio.effects) {
+            for (const effect of song.audio.effects) {
+                const eff = new AudioEffect();
+                eff.params = { ...effect.params };
+                eff.setType(effect.type);
 
-            if (effect.type === 'reverb') {
-                await eff.nodes[0].ready;
+                if (effect.type === 'reverb') {
+                    await eff.nodes[0].ready;
+                }
+
+                eff.nodes.forEach(node => {
+                    Tone.connect(previousNode, node);
+                    previousNode = node;
+                });
             }
-
-            eff.nodes.forEach(node => {
-                Tone.connect(previousNode, node);
-                previousNode = node;
-            });
         }
 
         Tone.connect(previousNode, Tone.getDestination());
