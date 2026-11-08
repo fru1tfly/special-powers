@@ -11,7 +11,6 @@ export class LevelObject {
 
 export class Room extends LevelObject {
     interactables = []
-    background = new Animation()
 
     constructor() {
         super()

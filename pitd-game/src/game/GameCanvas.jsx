@@ -19,7 +19,7 @@ let interactables = [];
 let features = [];
 let transitionAnim;
 let transitionFade;
-let backgroundAnim;
+let backgroundAnims = [];
 let touchMode = false;
 
 let gameStarted = false;
@@ -67,18 +67,20 @@ const renderLoop = (time) => {
 
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
-    if (backgroundAnim && !transitionAnim) {
-        const img = backgroundAnim.getCurrentImage();
+    if (!transitionAnim) {
+        for (const bgAnim of backgroundAnims) {
+            const img = bgAnim.getCurrentImage();
 
-        ctx.drawImage(
-            img,
-            imgDimensions.xOffset - canvas.width / 2,
-            imgDimensions.yOffset - canvas.height / 2,
-            imgDimensions.width,
-            imgDimensions.height
-        );
+            ctx.drawImage(
+                img,
+                imgDimensions.xOffset - canvas.width / 2,
+                imgDimensions.yOffset - canvas.height / 2,
+                imgDimensions.width,
+                imgDimensions.height
+            );
 
-        backgroundAnim.update(dt);
+            bgAnim.update(dt);
+        }
     }
 
     if (transitionAnim) {
@@ -221,19 +223,21 @@ export default function GameCanvas() {
 
     useEffect(() => {
         const room = gameState.rooms.find(r => r.id === gameState.room);
-        const background = room.interactables.find(i => i.objectType === 'Background');
+        const backgrounds = room.interactables.filter(i => i.objectType === 'Background');
 
         if (!gameStarted) {
-
             addRoomSongs(gameState.room, gameState.songs);
-
             gameStarted = true;
         }
 
-        if (background) {
-            backgroundAnim = initializeAnimation(background.frames);
-            roomBackground = getImage(background.frames.frames[0]);
+        if (backgrounds.length > 0) {
+            roomBackground = getImage(backgrounds[0].frames.frames[0]);
             sizeImage();
+        }
+
+        backgroundAnims = [];
+        for (const bg of backgrounds) {
+            backgroundAnims.push(initializeAnimation(bg.frames));
         }
         
         if (gameState.openArt && !openArt) {
