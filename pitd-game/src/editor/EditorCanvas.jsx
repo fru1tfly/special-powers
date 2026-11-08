@@ -138,8 +138,9 @@ export default function EditorCanvas() {
 
             roomBackgrounds = [];
             for (const bg of backgrounds) {
-                if (bg.assets.length > 0) {
-                    roomBackgrounds.push(getImage(bg.assets[0]));
+                const img = bg.assets.length > 0 ? getImage(bg.assets[0]) : null;
+                if (img) {
+                    roomBackgrounds.push(img);
                 }
             }
 
@@ -174,6 +175,7 @@ function drawShape(shape) {
     } else {
         const scaleFactor = imgDimensions.height / window.devicePixelRatio;
         const img = getImage(shape.assets[0]);
+        if (!img) return;
 
         const imgWidth = img.width / scaleFactor
         const imgHeight = img.height / scaleFactor;

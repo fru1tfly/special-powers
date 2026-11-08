@@ -26,12 +26,16 @@ export default function GameManager() {
 
     const setState = (gameData) => {
         if (!gameState || gameData.version > gameState.version) {
-            setGameState({
+            const newState = {
                 ...gameData,
                 room: gameData.rooms[0].id,
                 inventory: []
-            })
+            };
+            setGameState(newState);
+            return newState;
         }
+
+        return gameState;
     }
 
     return (

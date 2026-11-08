@@ -33,12 +33,16 @@ export default function Editor() {
         const localState = localStorage.getItem('editorState');
 
         if (!localState) {
-            updateEditorState({
+            const newState = {
                 ...gameData,
                 selectedRoom: '',
                 selectedInteractable: null
-            })
+            };
+            updateEditorState(newState);
+            return newState;
         }
+
+        return JSON.parse(localState);
     }
 
     return (

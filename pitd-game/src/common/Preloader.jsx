@@ -21,7 +21,7 @@ export default function Preloader({ playBtn, setState, children }) {
             const count = data.rooms.reduce(
                 (total, room) => total + getRoomAssetCount(room),
                 0
-            ) + data.songs.length;
+            ) + (data.songs?.length ?? 0);
 
             setAssetCount(count);
             setAssetLoaded(0);
@@ -32,7 +32,7 @@ export default function Preloader({ playBtn, setState, children }) {
                 }
             }
 
-            const songPromises = data.songs.map(song =>
+            const songPromises = (data.songs ?? []).map(song =>
                 (gameMode ? addSong(song) : addAudio(song.audio))
                     .then(incrementLoadedCount)
                     .catch(e => console.error('Failed to load song', song.id, e))
@@ -47,7 +47,9 @@ export default function Preloader({ playBtn, setState, children }) {
         const init = async () => {
             const gData = (await getGameData()).data;
             setGameData(gData);
-            setState(gData);
+            // setState may keep a locally saved state instead of the server data;
+            // preload assets for whichever state will actually be rendered.
+            const activeData = setState(gData) ?? gData;
 
 
             if (!gData.version && !gData.rooms) {
@@ -55,7 +57,7 @@ export default function Preloader({ playBtn, setState, children }) {
                 return;
             }
 
-            await loadAssets(gData);
+            await loadAssets(activeData);
 
             if (!cancelled) {
                 setLoaded(true);
