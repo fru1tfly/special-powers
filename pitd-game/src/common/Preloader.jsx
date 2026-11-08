@@ -1,7 +1,7 @@
 import { useGetGameData } from "../hooks/GameDataHelper";
 import { useState, useEffect } from "react";
 import { getRoomAssetCount, loadRoomAssets } from "../gameData/gameDataHelper";
-import { addAudio, addSong } from "../gameData/assetManager";
+import { addAudio, addSong, initializeAudio } from "../gameData/assetManager";
 import * as Tone from 'tone';
 
 export default function Preloader({ playBtn, setState, children }) {
@@ -70,8 +70,8 @@ export default function Preloader({ playBtn, setState, children }) {
     }, []);
 
     const playGame = async () => {
+        await initializeAudio();
         setPlaying(true);
-        await Tone.start();
     }
 
     const progress = assetCount > 0
