@@ -213,11 +213,12 @@ export class Fade extends Listenable {
 }
 
 export class Song extends LevelObject {
-    audio;
+    audio = null;
     rooms = [];
     behavior;
     reduction;
-    fadeTime = 0;
+    fadeInTime = 0;
+    fadeOutTime = 0;
 
     constructor() {
         super();
@@ -230,7 +231,8 @@ export class Song extends LevelObject {
             rooms: this.rooms,
             behavior: this.behavior,
             reduction: this.reduction,
-            fadeTime: this.fadeTime
+            fadeInTime: this.fadeInTime,
+            fadeOutTime: this.fadeOutTime
         }
     }
 }

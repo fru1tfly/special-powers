@@ -1,9 +1,10 @@
 import { useGetGameData } from "../hooks/GameDataHelper";
 import { useState, useEffect } from "react";
 import { getRoomAssetCount, loadRoomAssets } from "../gameData/gameDataHelper";
-import { addAudio, addSong, initializeAudio } from "../gameData/assetManager";
-import * as Tone from 'tone';
+import { addAudio, addSong, initializeAudio, Tone} from "../gameData/assetManager";
 import { fonts } from "../gameData/fonts";
+
+let toneLoaded = false;
 
 export default function Preloader({ playBtn, setState, children }) {
     const getGameData = useGetGameData();
@@ -13,6 +14,7 @@ export default function Preloader({ playBtn, setState, children }) {
     const [assetCount, setAssetCount] = useState(0);
     const [assetLoaded, setAssetLoaded] = useState(0);
     const [loaded, setLoaded] = useState(false);
+    const [finalLoad, setFinalLoad] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -33,7 +35,7 @@ export default function Preloader({ playBtn, setState, children }) {
                 }
             }
 
-            const songPromises = (data.songs ?? []).map(song =>
+            const songPromises = (data.songs ?? []).filter(song => song.audio && song.audio.url).map(song =>
                 (gameMode ? addSong(song) : addAudio(song.audio))
                     .then(incrementLoadedCount)
                     .catch(e => console.error('Failed to load song', song.id, e))
@@ -55,10 +57,7 @@ export default function Preloader({ playBtn, setState, children }) {
         const init = async () => {
             const gData = (await getGameData()).data;
             setGameData(gData);
-            // setState may keep a locally saved state instead of the server data;
-            // preload assets for whichever state will actually be rendered.
             const activeData = setState(gData) ?? gData;
-
 
             if (!gData.version && !gData.rooms) {
                 console.error('UNABLE TO LOAD GAME FILE');
@@ -81,7 +80,7 @@ export default function Preloader({ playBtn, setState, children }) {
     }, []);
 
     const playGame = async () => {
-        await Tone.start();
+        setFinalLoad(true);
         await initializeAudio();
         setPlaying(true);
     }
@@ -89,6 +88,23 @@ export default function Preloader({ playBtn, setState, children }) {
     const progress = assetCount > 0
         ? (assetLoaded / assetCount) * 100
         : 0;
+
+    const checkToneLoad = async () => {
+        if (!toneLoaded) {
+            await initializeAudio();
+            toneLoaded = true;
+        }
+    }
+
+    useEffect(() => {
+        if (!playBtn) {
+            window.addEventListener('click', checkToneLoad);
+        }
+
+        return () => {
+            window.removeEventListener('click', checkToneLoad);
+        }
+    })
         
     return (
         <>
@@ -98,7 +114,14 @@ export default function Preloader({ playBtn, setState, children }) {
                 </div>
             }
             {loaded && !playing && playBtn &&
-                <button onClick={playGame} className="play-btn">Play</button>
+                <>
+                    {!finalLoad &&
+                        <button onClick={playGame} className="play-btn">Play</button>
+                    }
+                    {finalLoad &&
+                        <p className="loading-text">loading...</p>
+                    }
+                </>
             }
             {loaded && (playing || !playBtn) && children}
         </>

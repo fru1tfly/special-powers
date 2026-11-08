@@ -57,7 +57,7 @@ export default function Multipicker({ list, source, setList, title }) {
                         value={excludedSelected}
                     >
                         <option disabled className="multipick-item">Excluded</option>
-                        {excluded.map(r => <option className="multipick-item" value={r.id}>{r.name}</option>)}
+                        {excluded.map(r => <option key={r.id} className="multipick-item" value={r.id}>{r.name}</option>)}
                     </select>
                 </div>
                 <div className="multipick-buttons">
@@ -72,7 +72,7 @@ export default function Multipicker({ list, source, setList, title }) {
                         value={includedSelected}
                     >
                         <option disabled className="multipick-item">Included</option>
-                        {included.map(r => <option className="multipick-item" value={r.id}>{r.name}</option>)}
+                        {included.map(r => <option key={r.id} className="multipick-item" value={r.id}>{r.name}</option>)}
                     </select>
                 </div>
             </div>

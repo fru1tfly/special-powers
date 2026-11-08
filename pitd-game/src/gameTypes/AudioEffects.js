@@ -1,4 +1,4 @@
-import * as Tone from 'tone';
+import { Tone } from "../gameData/assetManager";
 
 const normalRange = {
     type: 'range',
@@ -50,6 +50,7 @@ export class AudioEffect {
 
 
     setType(newType, useDefaults = true) {
+        const tone = Tone();
         this.type = newType;
         this.nodes.forEach(node => node.dispose());
 
@@ -72,7 +73,7 @@ export class AudioEffect {
                     }
                 }
 
-                const node = new Tone.Gain(this.params.gain, "decibels");
+                const node = new tone.Gain(this.params.gain, "decibels");
                 this.nodes = [node];
                 break;
             }
@@ -106,7 +107,7 @@ export class AudioEffect {
                     wet: wetDry
                 }
 
-                const node = new Tone.Reverb(this.params);
+                const node = new tone.Reverb(this.params);
                 this.nodes = [node];
                 break;
             }
@@ -135,7 +136,7 @@ export class AudioEffect {
                     wet: wetDry
                 }
 
-                const node = new Tone.Distortion(this.params);
+                const node = new tone.Distortion(this.params);
                 this.nodes = [node];
                 break;
             }
@@ -160,7 +161,7 @@ export class AudioEffect {
                     wet: wetDry
                 }
 
-                const node = new Tone.BitCrusher(this.params);
+                const node = new tone.BitCrusher(this.params);
                 this.nodes = [node];
                 break;
             }
@@ -186,7 +187,7 @@ export class AudioEffect {
                     wet: wetDry
                 }
 
-                const node = new Tone.FeedbackDelay(this.params);
+                const node = new tone.FeedbackDelay(this.params);
                 this.nodes = [node];
                 break;
             }
@@ -235,7 +236,7 @@ export class AudioEffect {
                     wet: wetDry
                 }
 
-                const node = new Tone.Chorus(this.params);
+                const node = new tone.Chorus(this.params);
                 this.nodes = [node];
                 break;
             }
@@ -302,7 +303,7 @@ export class AudioEffect {
                     }
                 }
 
-                const node = new Tone.Filter(this.params);
+                const node = new tone.Filter(this.params);
                 this.nodes = [node];
                 break;
             }

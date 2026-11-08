@@ -20,8 +20,9 @@ export default function SongModal({ song, closeModal }) {
         if (existingSong.rooms) setSongRooms(existingSong.rooms);
         if (existingSong.startCondition) setStartCondition(existingSong.startCondition);
         if (existingSong.behavior) setBehavior(existingSong.behavior);
-        if (existingSong.fadeTime) setFadeTime(existingSong.fadeTime);
-        if (existingSong.reduction) setFadeTime(existingSong.reduction);
+        if (existingSong.fadeInTime) setFadeInTime(existingSong.fadeInTime);
+        if (existingSong.fadeOutTime) setFadeOutTime(existingSong.fadeOutTime);
+        if (existingSong.reduction) setReduction(existingSong.reduction);
     }, [song]);
 
     const [audio, setAudio] = useState({...existingSong.audio} ?? new GameAudio());
@@ -29,7 +30,8 @@ export default function SongModal({ song, closeModal }) {
     const [songRooms, setSongRooms] = useState(existingSong.rooms ?? []);
     const [startCondition, setStartCondition] = useState(existingSong.startCondition ?? 'room');
     const [behavior, setBehavior] = useState(existingSong.behavior ?? 'overlap');
-    const [fadeTime, setFadeTime] = useState(existingSong.fadeTime ?? 0);
+    const [fadeInTime, setFadeInTime] = useState(existingSong.fadeInTime ?? 0);
+    const [fadeOutTime, setFadeOutTime] = useState(existingSong.fadeOutTime ?? 0);
     const [reduction, setReduction] = useState(existingSong.reduction ?? 0);
 
     const [audioMode, setAudioMode] = useState(false);
@@ -63,7 +65,7 @@ export default function SongModal({ song, closeModal }) {
         updateSong();
     }
 
-    const handleFadeTimeChange = (event) => {
+    const handleFadeInTimeChange = (event) => {
         let val = event.target.value;
         if (val < 0) {
             val = 0;
@@ -73,7 +75,21 @@ export default function SongModal({ song, closeModal }) {
             val = 10;
         }
 
-        setFadeTime(val);
+        setFadeInTime(val);
+        updateSong();
+    }
+
+    const handleFadeOutTimeChange = (event) => {
+        let val = event.target.value;
+        if (val < 0) {
+            val = 0;
+        }
+
+        if (val > 10) {
+            val = 10;
+        }
+
+        setFadeOutTime(val);
         updateSong();
     }
 
@@ -81,7 +97,7 @@ export default function SongModal({ song, closeModal }) {
         setAudioMode(true);
     }
 
-    const hasAudio = existingSong.audio !== undefined;
+    const hasAudio = existingSong && existingSong.audio && existingSong.audio.url;
 
     const uploadAudio = (event) => {
         const file = event.target.files[0];
@@ -114,7 +130,8 @@ export default function SongModal({ song, closeModal }) {
                         s.rooms = [...songRooms];
                         s.behavior = behavior;
                         s.reduction = reduction;
-                        s.fadeTime = fadeTime;
+                        s.fadeInTime = fadeInTime;
+                        s.fadeOutTime = fadeOutTime;
                     }
                 }
 
@@ -147,7 +164,7 @@ export default function SongModal({ song, closeModal }) {
             }}
         />
     ) : (
-        <div className="editor-modal">
+        <div className="editor-modal anim-modal">
             <div className="modal-body">
                 <div className="modal-section">
                     <div className="modal-field">
@@ -188,8 +205,12 @@ export default function SongModal({ song, closeModal }) {
                 </div>
                 <div className="modal-section">
                     <div className="modal-field">
-                        <div className="modal-field-label">Fade Time (in seconds)</div>
-                        <input type="number" min={0} max={10} onInput={handleFadeTimeChange} value={fadeTime}/>
+                        <div className="modal-field-label">Fade In Time (in seconds)</div>
+                        <input type="number" min={0} max={10} onInput={handleFadeInTimeChange} value={fadeInTime}/>
+                    </div>
+                    <div className="modal-field">
+                        <div className="modal-field-label">Fade Out Time (in seconds)</div>
+                        <input type="number" min={0} max={10} onInput={handleFadeOutTimeChange} value={fadeOutTime}/>
                     </div>
                     {behavior === 'overlap' && 
                         <div className="modal-field">

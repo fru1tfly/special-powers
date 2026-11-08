@@ -27,10 +27,13 @@ export default function AudioEffectMenu({
     }
 
     const handleConditionChange = (event) => {
-        update({
-            ...effect,
-            condition: event.target.value
-        });
+        effect.condition = event.target.value;
+        update(effect);
+    }
+
+    const handleRoomsChange = (newRooms) => {
+        effect.rooms = newRooms;
+        update(effect);
     }
 
     const rooms = editorState.rooms.map(room => ({
@@ -87,7 +90,7 @@ export default function AudioEffectMenu({
                                     value={val} 
                                 >
                                     {details.options.map(option => (
-                                        <option value={option}>{option}</option>
+                                        <option key={option} value={option}>{option}</option>
                                     ))}
                                 </select>
                             }
@@ -109,7 +112,7 @@ export default function AudioEffectMenu({
                 <Multipicker 
                     list={effect.rooms}
                     source={rooms}
-                    setList={update}
+                    setList={handleRoomsChange}
                     title='Rooms'
                 />
             }

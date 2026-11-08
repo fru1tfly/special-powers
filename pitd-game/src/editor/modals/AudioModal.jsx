@@ -3,9 +3,9 @@ import { EditorContext, SetEditorContext } from "../EditorContext";
 import { GameAudio } from "../../gameTypes/Audio";
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
-import * as Tone from 'tone';
 import { AudioEffect } from "../../gameTypes/AudioEffects";
 import AudioEffectMenu from "../AudioEffectMenu";
+import { Tone } from "../../gameData/assetManager";
 
 export default function AudioModal({ context, closeModal }) {
     const editorState = useContext(EditorContext);
@@ -113,7 +113,7 @@ export default function AudioModal({ context, closeModal }) {
 
         eventDestructors.push(wavesurfer.on('ready', async () => {
             const mediaElement = wavesurfer.getMediaElement();
-            const context = Tone.getContext();
+            const context = Tone().getContext();
 
             const source = context.createMediaElementSource(mediaElement);
             toneSourceRef.current = source;
@@ -224,31 +224,31 @@ export default function AudioModal({ context, closeModal }) {
         const source = toneSourceRef.current;
         if (!source) return;
 
-        Tone.disconnect(source);
+        Tone().disconnect(source);
 
         effects.forEach((effect) => {
-            effect.nodes.forEach((node) => Tone.disconnect(node));
+            effect.nodes.forEach((node) => Tone().disconnect(node));
         })
 
         if (effects.length === 0) {
-            Tone.connect(source, Tone.getDestination());
+            Tone().connect(source, Tone().getDestination());
         } else {
             // Connect the source through the effect nodes in order.
             let previousNode = source;
 
             effects.forEach((effect) => {
                 effect.nodes.forEach((node) => {
-                    Tone.connect(previousNode, node);
+                    Tone().connect(previousNode, node);
                     previousNode = node;
                 });
             });
 
             // Route the final effect to the destination.
-            Tone.connect(previousNode, Tone.getDestination());
+            Tone().connect(previousNode, Tone().getDestination());
         }
 
         return () => {
-            Tone.disconnect(source);
+            Tone().disconnect(source);
         }
 
     }, [wavesurferReady, effects]);
@@ -289,7 +289,7 @@ export default function AudioModal({ context, closeModal }) {
     }
 
     const playBtn = async () => {
-        await Tone.start();
+        await Tone().start();
 
         wavesurferRef.current.setPlaybackRate(speed, false);
 
@@ -343,7 +343,7 @@ export default function AudioModal({ context, closeModal }) {
         }
 
         effects.forEach((effect) => {
-            effect.nodes.forEach((node) => Tone.disconnect(node));
+            effect.nodes.forEach((node) => Tone().disconnect(node));
         })
         
         
@@ -424,6 +424,7 @@ export default function AudioModal({ context, closeModal }) {
                             <div className="effects-scroll">
                                 {effects.map((eff, ind) => 
                                     <AudioEffectMenu 
+                                        key={ind}
                                         effect={eff} 
                                         update={(newEff) => updateEffect(ind, newEff)}
                                         index={ind}
@@ -437,7 +438,7 @@ export default function AudioModal({ context, closeModal }) {
                         </div>
                     </div>
                     <div className="fader">
-                        <label className="modal-field-label" for="speed">Speed</label>
+                        <label className="modal-field-label" htmlFor="speed">Speed</label>
                         <input 
                             type="range" 
                             id="speed"
@@ -449,7 +450,7 @@ export default function AudioModal({ context, closeModal }) {
                         />
                     </div>
                     <div className="fader">
-                        <label className="modal-field-label" for="master">Master</label>
+                        <label className="modal-field-label" htmlFor="master">Master</label>
                         <input 
                             type="range" 
                             id="master"
