@@ -81,7 +81,7 @@ export const initializeAudio = async () => {
         } else {
             if (song.audio.loop) {
                 player.loopStart = song.audio.loopPoint;
-                player.loopEnd = player.buffer.duration;
+                player.loopEnd = player.sampleTime;
             }
         }
 
