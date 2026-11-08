@@ -35,7 +35,8 @@ export const imgDimensions = {
 export const gameArea = { size: 0, xOffset: 0, yOffset: 0 };
 
 const sizeImage = () => {
-    const border = UI.PAGE_PADDING * window.devicePixelRatio;
+    const narrowScreen = canvas.width / window.devicePixelRatio < 500;
+    const border = UI.PAGE_PADDING * window.devicePixelRatio * (narrowScreen ? 0.5 : 1);
 
     const size = Math.max(0, Math.min(canvas.width, canvas.height) - border * 2);
     gameArea.size = size;
@@ -60,8 +61,10 @@ const renderLoop = (time) => {
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
+    const narrowScreen = canvas.width / window.devicePixelRatio < 500;
+
     ctx.fillStyle = UI.BORDER_COLOR;
-    const borderThickness = UI.BORDER_THICKNESS * window.devicePixelRatio;
+    const borderThickness = UI.BORDER_THICKNESS * window.devicePixelRatio * (narrowScreen ? 0.5 : 1);
     ctx.fillRect(
         imgDimensions.xOffset - canvas.width / 2 - borderThickness,
         imgDimensions.yOffset - canvas.height / 2 - borderThickness,
@@ -202,7 +205,7 @@ const renderLoop = (time) => {
         transitionFade.update(dt);
     }
 
-    const fontSize = UI.FONT_SIZE * window.devicePixelRatio;
+    const fontSize = gameArea.size * UI.FONT_SIZE;
 
     ctx.fillStyle = UI.TEXT_COLOR;
     ctx.font = `${fontSize / 2}pt DithBirk-Italic`;
@@ -212,15 +215,18 @@ const renderLoop = (time) => {
     ctx.strokeStyle = UI.BORDER_COLOR;
     ctx.lineWidth = UI.BORDER_THICKNESS * window.devicePixelRatio * 0.6;
 
-    const slotSize = UI.INVENTORY_SLOT_SIZE * gameArea.size;
-    const slotCount = 6;
-    for (let i = 0; i < slotCount; i++) {
-        ctx.strokeRect(
-            slotSize * -slotCount / 2 + i * slotSize,
-            gameArea.size * 0.5 - slotSize, 
-            slotSize, 
-            slotSize
-        );
+
+    if (!narrowScreen) {
+        const slotSize = Math.max(UI.INVENTORY_SLOT_SIZE * gameArea.size, 30 * window.devicePixelRatio);
+        const slotCount = 6;
+        for (let i = 0; i < slotCount; i++) {
+            ctx.strokeRect(
+                slotSize * -slotCount / 2 + i * slotSize,
+                gameArea.size * 0.5 - slotSize, 
+                slotSize, 
+                slotSize
+            );
+        }
     }
 
 
