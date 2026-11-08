@@ -69,7 +69,10 @@ export const initializeAudio = async () => {
         if (!s.arrayBuffer) continue;
 
         const audioBuffer = await Tone.getContext().decodeAudioData(s.arrayBuffer);
-        const player = new Tone.Player(new Tone.ToneAudioBuffer(audioBuffer));
+        const player = new Tone.Player({
+            url: new Tone.ToneAudioBuffer(audioBuffer),
+            volume: Tone.gainToDb(song.audio.level / 100),
+        });
         player.loop = true;
         player.playbackRate = song.audio.speed;
 
