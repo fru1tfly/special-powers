@@ -12,6 +12,8 @@ import { getSong } from "../gameData/assetManager";
 let songStack = [];
 
 export async function addRoomSongs(roomId, songs) {
+
+    console.log('adding room songs');
     // look for given room in all songs' room lists
     // if song is not in the stack, add at the top
     await songs.forEach(async song => {
@@ -21,6 +23,7 @@ export async function addRoomSongs(roomId, songs) {
         if (songInRoom && !songInStack) {
             await playSong(song);
             songStack.unshift(song);
+            console.log('we so back');
         }
 
         if (songInStack && !songInRoom) {
