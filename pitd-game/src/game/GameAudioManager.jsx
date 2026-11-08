@@ -2,12 +2,6 @@ import { useState, useEffect, useRef } from "react";
 export default function GameAudioManager() {
     const [currentSong, setCurrentSong] = useState(null);
 
-    const playerRef = useRef(new Tone.Player());
-
-    useEffect(() => {
-
-    }, []);
-
     return <></>;
 }
 
