@@ -123,12 +123,26 @@ export function getCenter(points) {
     }
 }
 
-export function cleanTransitionData(interactable, newType) {
-    if (newType !== 'sprites' && interactable.transitionFrames) {
+export function cleanRoomData(rooms) {
+    return rooms.map(r => ({
+        ...r,
+        interactables: r.interactables.map(i => {
+            if (i.transitionType) {
+                return {
+                    ...cleanTransitionData(i, i.transitionType)
+                };
+            }
+            return i;
+        })
+    }))
+}
+
+export function cleanTransitionData(interactable, currentType) {
+    if (currentType !== 'sprites' && interactable.transitionFrames) {
         delete interactable.transitionFrames;
     }
 
-    if (newType !== 'fade' && interactable.transitionFade) {
+    if (currentType !== 'fade' && interactable.transitionFade) {
         delete interactable.transitionFade;
     }
 

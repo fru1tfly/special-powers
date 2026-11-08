@@ -5,6 +5,7 @@ import { Room, Interactable, Song } from "../gameTypes/LevelObjects"
 import { useUploadFile } from "../hooks/files/useUploadFile"
 import { useSaveGameData } from "../hooks/GameDataHelper"
 import SongModal from "./modals/SongModal"
+import { cleanRoomData } from "../gameData/gameDataHelper"
 
 export default function EditorMenu() {
 
@@ -90,7 +91,7 @@ export default function EditorMenu() {
     const saveRoomData = async () => {
         setSaving(true);
         await saveGameData({ 
-            rooms: editorState.rooms,
+            rooms: cleanRoomData(editorState.rooms),
             songs: editorState.songs
         });
         setTimeout(() => setSaving(false), 200);
