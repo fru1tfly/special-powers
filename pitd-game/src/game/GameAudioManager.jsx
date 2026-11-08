@@ -32,6 +32,10 @@ export async function addRoomSongs(roomId, songs) {
 
 async function playSong(song) {
     const songDefinition = getSong(song.id);
+    if (!songDefinition?.player) {
+        console.error('Song not loaded', song.id);
+        return;
+    }
     const audio = songDefinition.song.audio;
 
     const offset = audio.trimRegion
@@ -54,5 +58,5 @@ async function playSong(song) {
 
 function stopSong(song) {
     const songDefinition = getSong(song.id);
-    songDefinition.player.stop();
+    songDefinition?.player?.stop();
 }

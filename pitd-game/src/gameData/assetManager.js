@@ -50,16 +50,16 @@ export const addAudio = (def, prefix = import.meta.env.VITE_DOMAIN, callback = (
 }
 
 // Game Audio
-export const addSong = (song) => {
-    return new Promise(async (resolve, reject) => {
-        const res = await fetch(`${import.meta.env.VITE_DOMAIN}${song.audio.url}`);
-        SONGS[song.id] = { 
-            arrayBuffer: await res.arrayBuffer(), 
-            song 
-        };
-        
-        resolve();
-    });
+export const addSong = async (song) => {
+    const url = `${import.meta.env.VITE_DOMAIN}${song.audio.url}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch ${url}: ${res.status}`);
+    }
+    SONGS[song.id] = {
+        arrayBuffer: await res.arrayBuffer(),
+        song
+    };
 }
 
 export const initializeAudio = async () => {
@@ -92,7 +92,7 @@ export const initializeAudio = async () => {
 
         let previousNode = player.output;
 
-        await song.audio.effects.forEach(async effect => {
+        for (const effect of song.audio.effects) {
             const eff = new AudioEffect();
             eff.params = { ...effect.params };
             eff.setType(effect.type);
@@ -105,7 +105,7 @@ export const initializeAudio = async () => {
                 Tone.connect(previousNode, node);
                 previousNode = node;
             });
-        });
+        }
 
         Tone.connect(previousNode, Tone.getDestination());
 

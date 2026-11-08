@@ -1,5 +1,3 @@
-const ctx = new AudioContext();
-
 export class GameAudio {
     url;
     loop;

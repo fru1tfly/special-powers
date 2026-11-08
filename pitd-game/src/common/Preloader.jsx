@@ -32,15 +32,16 @@ export default function Preloader({ playBtn, setState, children }) {
                 }
             }
 
-            data.songs.forEach(async (song) => {
-                if (gameMode) {
-                    await addSong(song);
-                } else {
-                    await addAudio(song.audio);
-                }
-            });
+            const songPromises = data.songs.map(song =>
+                (gameMode ? addSong(song) : addAudio(song.audio))
+                    .then(incrementLoadedCount)
+                    .catch(e => console.error('Failed to load song', song.id, e))
+            );
 
-            await Promise.all(data.rooms.flatMap(room => loadRoomAssets(room, incrementLoadedCount)));
+            await Promise.all([
+                ...songPromises,
+                ...data.rooms.flatMap(room => loadRoomAssets(room, incrementLoadedCount))
+            ]);
         }
 
         const init = async () => {
