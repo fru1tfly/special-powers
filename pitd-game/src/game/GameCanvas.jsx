@@ -9,13 +9,14 @@ import { Animation, Fade } from "../gameTypes/LevelObjects";
 import { hasArea } from "../gameData/Interactables";
 import { cursorImages } from "../gameData/cursors";
 import { addRoomSongs } from "./GameAudioManager";
+import * as UI from "./uiHelper";
 
 let canvas;
 export let ctx;
 
-let roomBackground;
 let openArt = null;
 let interactables = [];
+let roomName = '';
 let features = [];
 let transitionAnim;
 let transitionFade;
@@ -31,29 +32,20 @@ export const imgDimensions = {
     yOffset: 0 
 };
 
+export const gameArea = { size: 0, xOffset: 0, yOffset: 0 };
+
 const sizeImage = () => {
-    const imgAspectRatio = roomBackground.width / roomBackground.height;
-    const canvasAspectRatio = canvas.width / canvas.height;
+    const border = UI.PAGE_PADDING * window.devicePixelRatio;
 
+    const size = Math.max(0, Math.min(canvas.width, canvas.height) - border * 2);
+    gameArea.size = size;
+    gameArea.xOffset = (canvas.width - size) / 2;
+    gameArea.yOffset = (canvas.height - size) / 2;
 
-    if (imgAspectRatio === canvasAspectRatio) {
-        imgDimensions.width = canvas.width;
-        imgDimensions.height = canvas.height;
-        imgDimensions.xOffset = 0;
-        imgDimensions.yOffset = 0;
-    } else if (imgAspectRatio < canvasAspectRatio) {
-        const yScale = canvas.height / roomBackground.height;
-        imgDimensions.width = roomBackground.width * yScale;
-        imgDimensions.height = canvas.height;
-        imgDimensions.xOffset = (canvas.width - imgDimensions.width) / (2);
-        imgDimensions.yOffset = 0;
-    } else if (imgAspectRatio > canvasAspectRatio) {
-        const xScale = canvas.width / roomBackground.width;
-        imgDimensions.width = canvas.width;
-        imgDimensions.height = roomBackground.height * xScale;
-        imgDimensions.xOffset = 0;
-        imgDimensions.yOffset = (canvas.height - imgDimensions.height) / (2);
-    }
+    imgDimensions.width = size;
+    imgDimensions.height = size / UI.ROOM_ASPECT_RATIO;
+    imgDimensions.xOffset = gameArea.xOffset;
+    imgDimensions.yOffset = gameArea.yOffset + (size - imgDimensions.height) / 2;
 }
 
 let prevTime = 0;
@@ -62,22 +54,57 @@ const renderLoop = (time) => {
     prevTime = time;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#021314';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-
     ctx.translate(canvas.width / 2, canvas.height / 2);
+
+    ctx.fillStyle = UI.BORDER_COLOR;
+    const borderThickness = UI.BORDER_THICKNESS * window.devicePixelRatio;
+    ctx.fillRect(
+        imgDimensions.xOffset - canvas.width / 2 - borderThickness,
+        imgDimensions.yOffset - canvas.height / 2 - borderThickness,
+        imgDimensions.width + borderThickness * 2,
+        imgDimensions.height + borderThickness * 2
+    )
+
+    ctx.fillStyle = 'black';
+
+    ctx.fillRect(
+        imgDimensions.xOffset - canvas.width / 2,
+        imgDimensions.yOffset - canvas.height / 2,
+        imgDimensions.width,
+        imgDimensions.height
+    )
 
     if (!transitionAnim) {
         for (const bgAnim of backgroundAnims) {
             const img = bgAnim.getCurrentImage();
 
-            ctx.drawImage(
-                img,
-                imgDimensions.xOffset - canvas.width / 2,
-                imgDimensions.yOffset - canvas.height / 2,
-                imgDimensions.width,
-                imgDimensions.height
-            );
+            const aspectRatio = img.width / img.height;
+
+            if (aspectRatio < UI.ROOM_ASPECT_RATIO) {
+                const additionalXOffset = (imgDimensions.width - (imgDimensions.height * aspectRatio)) / 2;
+
+                ctx.drawImage(
+                    img,
+                    imgDimensions.xOffset - canvas.width / 2 + additionalXOffset,
+                    imgDimensions.yOffset - canvas.height / 2,
+                    imgDimensions.height * aspectRatio,
+                    imgDimensions.height
+                );
+            } else {
+                const additionalYOffset = (imgDimensions.height - (imgDimensions.width / aspectRatio)) / 2;
+
+                ctx.drawImage(
+                    img,
+                    imgDimensions.xOffset - canvas.width / 2,
+                    imgDimensions.yOffset - canvas.height / 2  + additionalYOffset,
+                    imgDimensions.width,
+                    imgDimensions.width / aspectRatio
+                );
+            }
 
             bgAnim.update(dt);
         }
@@ -175,6 +202,27 @@ const renderLoop = (time) => {
         transitionFade.update(dt);
     }
 
+    const fontSize = UI.FONT_SIZE * window.devicePixelRatio;
+
+    ctx.fillStyle = UI.TEXT_COLOR;
+    ctx.font = `${fontSize / 2}pt DithBirk-Italic`;
+    ctx.textAlign = 'center';
+    ctx.fillText(roomName, 0, -gameArea.size / 2 + fontSize / 2);
+
+    ctx.strokeStyle = UI.BORDER_COLOR;
+    ctx.lineWidth = UI.BORDER_THICKNESS * window.devicePixelRatio * 0.6;
+
+    const slotSize = UI.INVENTORY_SLOT_SIZE * gameArea.size;
+    const slotCount = 6;
+    for (let i = 0; i < slotCount; i++) {
+        ctx.strokeRect(
+            slotSize * -slotCount / 2 + i * slotSize,
+            gameArea.size * 0.5 - slotSize, 
+            slotSize, 
+            slotSize
+        );
+    }
+
 
     ctx.restore();
 
@@ -204,9 +252,7 @@ export default function GameCanvas() {
 
             setDimensions(canvas.width, canvas.height);
 
-            if (roomBackground) {
-                sizeImage();
-            }
+            sizeImage();
 
         }
         resizeWindow();
@@ -225,14 +271,11 @@ export default function GameCanvas() {
         const room = gameState.rooms.find(r => r.id === gameState.room);
         const backgrounds = room.interactables.filter(i => i.objectType === 'Background');
 
+        roomName = room.name;
+
         if (!gameStarted) {
             addRoomSongs(gameState.room, gameState.songs);
             gameStarted = true;
-        }
-
-        if (backgrounds.length > 0) {
-            roomBackground = getImage(backgrounds[0].assets[0]);
-            sizeImage();
         }
 
         backgroundAnims = [];

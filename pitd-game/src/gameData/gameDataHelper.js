@@ -125,10 +125,17 @@ export function getCenter(points) {
 
 export function cleanRoomData(rooms) {
     return rooms.map(r => {
+
+        // TEMP - remove outdated state variables from game state, can remove once newer version is up on the server
         if (r.background) {
             delete r.background;
         }
-        
+
+        if (r.imgUrl) {
+            delete r.imgUrl;
+        }
+        // END TEMP
+
         return {
             ...r,
             interactables: r.interactables.map(i => {

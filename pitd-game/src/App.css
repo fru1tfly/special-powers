@@ -1,6 +1,9 @@
 :root {
     --purple-1: #7c425b;
     --purple-2: #c1668e;
+
+    --border: #002722;
+    --text: #ef3b18;
 }
 
 .custom-cursor {
@@ -13,30 +16,29 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 5px solid var(--purple-1);
-    border-radius: 1rem;
+    border: 5px solid var(--border);
+    border-radius: 0.125rem;
     width: 20rem;
     height: 4rem;
     display: flex;
 }
 
 .preloader-bar {
-    background-color: var(--purple-2);
+    background-color: var(--border);
     margin: 0.5rem;
     border-radius: 0.25rem;
 }
 
 .play-btn {
-    border: 5px solid var(--purple-1);
+    border: 5px solid var(--border);
     background-color: transparent;
-    padding: 1.5rem 4rem;
+    padding: 0.75rem 4rem 0.625rem;
     font-size: 36px;
-    color: var(--purple-1);
-    font-family: 'Arial';
+    color: var(--border);
+    font-family: 'DithBirk-Bold';
     text-transform: uppercase;
-    letter-spacing: 6px;
-    font-weight: 300;
-    border-radius: 1rem;
+    letter-spacing: 3px;
+    border-radius: 0.125rem;
     position: absolute;
     top: 50%;
     left: 50%;

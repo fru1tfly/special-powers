@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getRoomAssetCount, loadRoomAssets } from "../gameData/gameDataHelper";
 import { addAudio, addSong, initializeAudio } from "../gameData/assetManager";
 import * as Tone from 'tone';
+import { fonts } from "../gameData/fonts";
 
 export default function Preloader({ playBtn, setState, children }) {
     const getGameData = useGetGameData();
@@ -38,8 +39,15 @@ export default function Preloader({ playBtn, setState, children }) {
                     .catch(e => console.error('Failed to load song', song.id, e))
             );
 
+            const fontPromises = fonts.map(fontData => {
+                const font = new FontFace(fontData.name, fontData.url, fontData.options);
+                document.fonts.add(font);
+                return font.load();
+            });
+
             await Promise.all([
                 ...songPromises,
+                ...fontPromises,
                 ...data.rooms.flatMap(room => loadRoomAssets(room, incrementLoadedCount))
             ]);
         }
