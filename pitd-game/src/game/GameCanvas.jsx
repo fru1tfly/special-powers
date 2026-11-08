@@ -231,7 +231,7 @@ export default function GameCanvas() {
         }
 
         if (backgrounds.length > 0) {
-            roomBackground = getImage(backgrounds[0].frames.frames[0]);
+            roomBackground = getImage(backgrounds[0].assets[0]);
             sizeImage();
         }
 
