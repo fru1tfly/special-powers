@@ -47,6 +47,8 @@ export default function GameInputHandler() {
                                 updateCursor('look');
                             } else if (int.objectType === 'MovePoint') {
                                 updateCursor(int.icon);
+                            } else if (int.objectType === 'AudioPlayer') {
+                                updateCursor('speaker');
                             }
                         }
                     } else if (showOnScreen(int)) {

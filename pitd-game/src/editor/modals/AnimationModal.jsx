@@ -1,10 +1,10 @@
 import { EditorContext, SetEditorContext } from '../EditorContext';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useUploadFile } from '../../hooks/files/useUploadFile';
 import { useGetInteractable, useUpdateInteractable } from "../../hooks/editor/InteractableHelper";
 import AnimationCanvas from '../AnimationCanvas';
 import { Animation } from '../../gameTypes/LevelObjects';
 import { addImage } from '../../gameData/assetManager';
+import FileModal from './FileModal';
 
 export default function AnimationModal({ animatedField, closeModal }) {
     const editorState = useContext(EditorContext);
@@ -23,7 +23,7 @@ export default function AnimationModal({ animatedField, closeModal }) {
     const [loopMode, setLoopMode] = useState(existingAnimation?.loopMode ?? 'loop');
     const [loopTimes, setLoopTimes] = useState(existingAnimation?.timesToPlay ?? 1);
 
-    const { uploadFile } = useUploadFile();
+    const [fileMode, setFileMode] = useState(false);
 
     const frameRefs = useRef([]);
 
@@ -35,7 +35,6 @@ export default function AnimationModal({ animatedField, closeModal }) {
     if (!playing) {
         animation.currentFrame = selectedFrame;
     }
-
 
     useEffect(() => {
         frameRefs.current[selectedFrame]?.scrollIntoView({
@@ -53,37 +52,6 @@ export default function AnimationModal({ animatedField, closeModal }) {
 
         return unsubscribe;
     }, [animation])
-
-
-    const uploadMulti = async (event) => {
-        const files = Array.from(event.target.files);
-
-        const newUrls = await Promise.all(files.map(async (file) => {
-            const newUrl = await uploadFile(file, '/images/sprites');
-            return newUrl;
-        }));
-
-        await Promise.all(newUrls.map(url => addImage(url)));
-
-        if (entryPoint === 'end') {
-            updateInteractable({
-                ...selectedInteractable,
-                assets: [ 
-                    ...selectedInteractable.assets,
-                    ...newUrls
-                ]
-            });
-        } else if (entryPoint === 'selected') {
-            updateInteractable({
-                ...selectedInteractable,
-                assets: [ 
-                    ...selectedInteractable.assets.slice(0, selectedFrame + 1),
-                    ...newUrls,
-                    ...selectedInteractable.assets.slice(selectedFrame + 1)
-                ]
-            });
-        }
-    }
 
     const startPlaying = () => {
         if (loopMode === 'once' || loopMode === 'x') {
@@ -154,8 +122,53 @@ export default function AnimationModal({ animatedField, closeModal }) {
         closeModal();
     }
 
-    return  (
-        <div className="editor-modal anim-modal">
+    const handleAnimFileModal = () => {
+        setFileMode(true);
+    }
+
+    const handleFramesUpdate = (frames) => {
+        if (entryPoint === 'end') {
+            updateInteractable({
+                ...selectedInteractable,
+                assets: [ 
+                    ...selectedInteractable.assets,
+                    ...frames
+                ]
+            });
+        } else if (entryPoint === 'selected') {
+            updateInteractable({
+                ...selectedInteractable,
+                assets: [ 
+                    ...selectedInteractable.assets.slice(0, selectedFrame + 1),
+                    ...frames,
+                    ...selectedInteractable.assets.slice(selectedFrame + 1)
+                ]
+            });
+        }
+        setFileMode(false);
+    }
+
+    const extendFrame = () => {
+        updateInteractable({
+            ...selectedInteractable,
+            assets: [ 
+                ...selectedInteractable.assets.slice(0, selectedFrame + 1),
+                selectedInteractable.assets[selectedFrame],
+                ...selectedInteractable.assets.slice(selectedFrame + 1)
+            ]
+        });
+
+        setSelectedFrame(selectedFrame + 1);
+    }
+
+    return fileMode ? (
+            <FileModal
+                fileType="image"
+                multi={true}
+                addFiles={handleFramesUpdate}
+            />
+        ) : (
+        <div className="editor-modal tall-modal">
             <div className="modal-body">
                 <div className="modal-section frame-row">
                     <button onClick={decreaseSelectedFrame} className={playing ? 'disabled-btn' : ''}>⬅</button>
@@ -193,8 +206,7 @@ export default function AnimationModal({ animatedField, closeModal }) {
                 </div>
                 <div className="modal-section">
                     <div className="modal-field">
-                        <label htmlFor="sprite" className="uploadLabel action-btn">Add Frame(s)</label>
-                        <input type="file" accept="image/*" onChange={uploadMulti} id="sprite" multiple />
+                        <button className="action-btn" onClick={handleAnimFileModal}>Add Frame(s)</button>
                     </div>
                     <div className="modal-field">
                         <select onChange={handleEntryPointChange}>
@@ -236,6 +248,7 @@ export default function AnimationModal({ animatedField, closeModal }) {
                 {playing &&
                     <button className="modal-footer-button" onClick={stopPlaying}>Stop</button>
                 }
+                <button onClick={extendFrame} className={playing ? 'modal-footer-button disabled-btn' : 'modal-footer-button'}>Extend Frame</button>
                 <button onClick={deleteFrame} className={playing ? 'modal-footer-button disabled-btn' : 'modal-footer-button'}>Delete Frame</button>
                 <button className="modal-footer-button action-btn" onClick={saveAnimation}>Done</button>
             </div>

@@ -4,21 +4,22 @@ import axios from '../../stores/axios'
 export function useUploadFile() {
     const [isLoading, setIsLoading] = useState(false);
 
-    const uploadFile = (file, destination) => {
+    const uploadFile = (file, destination, keepName = false) => {
         setIsLoading(true);
 
         const form = new FormData();
         form.append('destination', destination);
+        form.append('keepName', keepName ? 'true' : 'false');
         form.append('file', file);
 
         return axios.post(
             `${import.meta.env.VITE_API_URL}/file/upload`,
             form,
-	    {
-	        headers: {
-		    "Content-Type": "multipart/form-data"
-		}
-	    }
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            }
         ).then((response) => {
             return response.data.file.replaceAll('\\', '/');
         });

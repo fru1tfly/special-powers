@@ -1,5 +1,7 @@
 import { useContext } from "react";
 import { GameContext, SetGameContext } from "../../game/GameContext";
+import { isPlaying, playSound, stopSound } from "../../game/GameAudioManager";
+import { getSound } from "../../gameData/assetManager";
 
 export function useInteractable() {
     const gameState = useContext(GameContext);
@@ -24,9 +26,20 @@ export function useInteractable() {
                             transitionFade: interactable.transitionFade ?? null
                         });
                     }
+
+                    const openSound = getSound(interactable.openSound?.id);
+                    if (openSound) {
+                        playSound(openSound);
+                    }
                     
                     return true;
                 } else {
+
+                    const lockedSound = getSound(interactable.lockedSound?.id);
+                    if (lockedSound) {
+                        playSound(lockedSound);
+                    }
+
                     return false;
                 }
             }
@@ -35,6 +48,12 @@ export function useInteractable() {
                     ...gameState,
                     openArt: interactable.assets[0]
                 });
+
+                const viewSound = getSound(interactable.viewSound?.id);
+                if (viewSound) {
+                    playSound(viewSound);
+                }
+
                 return true;
             }
             case 'Key': {
@@ -46,6 +65,12 @@ export function useInteractable() {
                     })),
                     inventory: [...gameState.inventory, interactable.id]
                 });
+
+                const pickupSound = getSound(interactable.pickupSound?.id);
+                if (pickupSound) {
+                    playSound(pickupSound);
+                }
+
                 return true;
             }
             case 'MovePoint': {
@@ -63,8 +88,26 @@ export function useInteractable() {
                         transitionFade: interactable.transitionFade ?? null
                     });
                 }
+
+                const moveSound = getSound(interactable.moveSound?.id);
+                if (moveSound) {
+                    playSound(moveSound);
+                }
             
                 return true;
+            }
+
+            case 'AudioPlayer': {
+                const playing = isPlaying(interactable.audio?.id) ?? false;
+
+                if (interactable.audio && !playing) {
+                    const playerAudio = getSound(interactable.audio.id);
+                    if (playerAudio) {
+                        playSound(playerAudio);
+                    }
+                } else if (interactable.audio && playing) {
+                    stopSound(interactable.audio.id);
+                }
             }
         }
     }

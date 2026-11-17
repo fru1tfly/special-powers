@@ -10,6 +10,8 @@ import AnimationModal from "./AnimationModal";
 import { cursorImages, cursors } from "../../gameData/cursors";
 import { hasArea, hasPosition } from "../../gameData/Interactables";
 import FadeModal from "./FadeModal";
+import SoundModal from "./SoundModal";
+import AudioPreview from "../AudioPreview";
 
 const TYPES = {
     '--None--': '',
@@ -18,7 +20,8 @@ const TYPES = {
     'Key': 'Key',
     'Background': 'Background',
     'Move Point': 'MovePoint',
-    'Animated Object': 'AnimatedObject'
+    'Animated Object': 'AnimatedObject',
+    'Audio Player': 'AudioPlayer'
 }
 
 export default function EditorModal() {
@@ -30,9 +33,11 @@ export default function EditorModal() {
 
     const [animMode, setAnimMode] = useState(false);
     const [fadeMode, setFadeMode] = useState(false);
+    const [soundMode, setSoundMode] = useState(false);
 
     const [animField, setAnimField] = useState('');
     const [fadeField, setFadeField] = useState('');
+    const [soundField, setSoundField] = useState('');
 
     const { uploadFile } = useUploadFile();
 
@@ -255,12 +260,21 @@ export default function EditorModal() {
         setFadeMode(true);
     }
 
+    const handleEditSound = (fieldName) => {
+        setSoundField(fieldName);
+        setSoundMode(true);
+    }
+
     const handleCloseAnimation = () => {
         setAnimMode(false);
     }
 
     const handleCloseFade = () => {
         setFadeMode(false);
+    }
+
+    const handleCloseSound = () => {
+        setSoundMode(false);
     }
 
     return shapeMode ? (
@@ -298,6 +312,8 @@ export default function EditorModal() {
         <AnimationModal animatedField={animField} closeModal={handleCloseAnimation} />
     ) : fadeMode ? (
         <FadeModal fadeField={fadeField} closeModal={handleCloseFade} />
+    ) : soundMode ? (
+        <SoundModal soundField={soundField} closeModal={handleCloseSound} />
     ) : (
         <div className="editor-modal">
             <div className="modal-body">
@@ -390,6 +406,13 @@ export default function EditorModal() {
                                         {def.type === 'fade' && (
                                             <>
                                                 <button onClick={() => handleEditFade(formValue)}>Edit Fade</button>
+                                            </>
+                                        )}
+
+                                        {def.type === 'sound' && (
+                                            <>
+                                                <AudioPreview audio={selectedInteractable[formValue]?.audio} />
+                                                <button onClick={() => handleEditSound(formValue)}>Edit Sound</button>
                                             </>
                                         )}
 

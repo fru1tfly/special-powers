@@ -2,7 +2,6 @@ import { useContext, useState } from "react"
 import EditorSidebar from "./EditorSidebar"
 import { EditorContext, SetEditorContext } from "./EditorContext"
 import { Room, Interactable, Song } from "../gameTypes/LevelObjects"
-import { useUploadFile } from "../hooks/files/useUploadFile"
 import { useSaveGameData } from "../hooks/GameDataHelper"
 import SongModal from "./modals/SongModal"
 import { cleanRoomData } from "../gameData/gameDataHelper"
@@ -11,7 +10,6 @@ export default function EditorMenu() {
 
     const editorState = useContext(EditorContext)
     const setEditorState = useContext(SetEditorContext)
-    const { uploadFile } = useUploadFile();
     const { saveGameData } = useSaveGameData();
 
     const [saving, setSaving] = useState(false);
@@ -104,24 +102,6 @@ export default function EditorMenu() {
         reader.onload = ({ target }) => {
             setEditorState(JSON.parse(target.result))
         }
-    }
-
-    const uploadBackground = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        uploadFile(file, '/images/backgrounds').then(response => {
-            const imgUrl = response;
-            setEditorState({
-                ...editorState,
-                rooms: editorState.rooms.map(r => {
-                    if (r.id === selectedRoom.id) {
-                        r.imgUrl = imgUrl;
-                    }
-                    return r;
-                })
-            })
-        });
     }
 
     const handleNewInteractable = () => {
@@ -218,7 +198,7 @@ export default function EditorMenu() {
     const goDownButtonClass = selectedIntIndex === 0 || !selectedInteractable ? 'disabled-btn' : '';
     const goDeleteButtonClass = !selectedInteractable ? 'disabled-btn' : '';
 
-    const roomUpButtonClass = selectedRoomIndex === 0 ? 'disabled-btn' : '';
+    const roomUpButtonClass = selectedRoomIndex <= 0 ? 'disabled-btn' : '';
     const roomDownButtonClass = selectedRoomIndex === editorState.rooms.length - 1 ? 'disabled-btn' : '';
     const roomDeleteClass = !selectedRoom ? 'disabled-btn' : '';
 
@@ -294,11 +274,6 @@ export default function EditorMenu() {
                 <EditorSidebar>
                     <div className="section-label">Room Name</div>
                     <input type="text" value={selectedRoom.name} onChange={handleNameChange} />
-                    {/* <label htmlFor="bg" className="uploadLabel">
-                        {selectedRoom.imgUrl ? 'Swap ' : 'Add '}
-                        Background
-                    </label>
-                    <input type="file" accept="image/*" onChange={uploadBackground} id="bg" /> */}
                     <button id="newShape" onClick={handleNewInteractable} className="action-btn">New Game Object</button>
 
                     <div className="section-label">Game Objects</div>

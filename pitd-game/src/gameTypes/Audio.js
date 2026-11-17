@@ -5,4 +5,8 @@ export class GameAudio {
     level;
     speed;
     effects = [];
+    emitter;
+    emitterRegions;
+    emitterInterval;
+    emitterSkipChance;
 }

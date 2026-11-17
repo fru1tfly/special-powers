@@ -1,7 +1,7 @@
 import { gameData } from "./gameData";
 import { Vector2 } from "../gameTypes/Vector";
 import { canvasWidth, canvasHeight } from "../stores/dimensions";
-import { addImage } from "./assetManager";
+import { addImage, addSound } from "./assetManager";
 import { imgDimensions } from "../game/GameCanvas";
 import { hasPosition } from "./Interactables";
 import { useUpdateInteractable } from "../hooks/editor/InteractableHelper";
@@ -32,7 +32,25 @@ export function loadRoomAssets(room, callback) {
         }
     }
 
+    for (const sound of getRoomSounds(room)) {
+        assetPromises.push(addSound(sound, callback));
+    }
+
     return assetPromises;
+}
+
+function getRoomSounds(room) {
+    const sounds = [];
+
+    for (const i of room.interactables) {
+        for (const field of Object.keys(i)) {
+            if (i[field].audio) {
+                sounds.push(i[field]);
+            }
+        }
+    }
+
+    return sounds;
 }
 
 export function getRoomAssetCount(room) {
@@ -46,6 +64,8 @@ export function getRoomAssetCount(room) {
             count += Object.keys(f.assets).length;
         }
     }
+
+    count += getRoomSounds(room).length;
 
     return count;
 }
@@ -160,4 +180,15 @@ export function cleanTransitionData(interactable, currentType) {
     }
 
     return { ...interactable };
+}
+
+export function getAllStrings(value, found = new Set()) {
+    if (typeof value === 'string') {
+        found.add(value);
+    } else if (Array.isArray(value)) {
+        value.forEach(v => getAllStrings(v, found));
+    } else if (value && typeof value === 'object') {
+        Object.values(value).forEach(v => getAllStrings(v, found));
+    }
+    return found;
 }

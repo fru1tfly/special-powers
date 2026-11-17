@@ -20,8 +20,8 @@ const renderLoop = (time) => {
         animation.update(dt);
     }
 
-    if (animation.frames.length > 0) {
-        const img = animation.getCurrentImage();
+    const img = animation.frames.length > 0 ? animation.getCurrentImage() : null;
+    if (img && img.complete && img.naturalWidth > 0) {
         let imgWidth = img.width;
         let imgHeight = img.height;
 

@@ -140,7 +140,7 @@ input[type="text"], input[type="number"], select {
     flex-direction: column;
 }
 
-.anim-modal {
+.tall-modal {
     height: 90vh;
     top: 5vh;
 }
@@ -206,6 +206,7 @@ input[type="text"], input[type="number"], select {
 
 .modal-footer-button {
     flex-grow: 1;
+    display: block;
 }
 
 .help-text {
@@ -246,7 +247,7 @@ input[type="text"], input[type="number"], select {
     font-size: 14px;
 }
 
-.disabled-btn {
+.disabled-btn, button:disabled {
     background-color: #573737 !important;
     color: #7e7b7b;
     pointer-events: none;
@@ -405,6 +406,33 @@ input[type="range"]::-webkit-slider-thumb {
     min-height: 0;
 }
 
+.emitter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.emitter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.emitter-field > input {
+    width: 120px;
+}
+
+.emitter-info {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
 .audio-effect-container {
     flex-grow: 1;
     display: flex;
@@ -541,4 +569,138 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 1.5rem;
     padding: 1rem;
     cursor: pointer;
+}
+
+.modal-card-container {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    gap: 0.5rem;
+    aspect-ratio: 1;
+
+    flex-grow: 1;
+    min-height: 0;
+    align-items: flex-start;
+}
+
+.file-modal-card {
+    width: 8vw;
+    height: 8vw;
+    border: 2px solid black;
+    padding: 0.5rem;
+
+    position: relative;
+}
+
+.file-modal-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.file-modal {
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.modal-stacked-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.selected-modal-card-container {
+    border: 5px white solid;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    user-select: none;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.selected-index-text {
+    color: #fff;
+    z-index: 1000;
+    font-size: 8rem;
+}
+
+.modal-card-container-loading-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+}
+
+
+.unused-modal-card-container {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(65, 68, 41, 0.4);
+    color:#635656;
+    font-weight: 700;
+}
+
+.file-modal-audio-card {
+    border: 2px solid black;
+    padding: 0.5rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    position: relative;
+}
+
+.file-modal-audio-card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.file-audio-status-unused {
+    color: #ffffff;
+    font-weight: 700;
+    background-color :#7C425B;
+    padding: 0.35rem 1.25rem;
+    border: 2px solid black;
+}
+
+.file-audio-status-used {
+    color: #e3ee07;
+    font-weight: 700;
+    background-color :#7C425B;
+    padding: 0.5rem 1.25rem;
+}
+
+.file-modal-audio-title {
+    padding: 0.5rem 0;
+    font-weight: 600;
+}
+
+.file-audio-action-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.no-audio-message {
+    height: 54px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
 }

@@ -1,4 +1,4 @@
-import { useContext, useState, useRef, useEffect } from "react";
+import { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { EditorContext, SetEditorContext } from "../EditorContext";
 import { GameAudio } from "../../gameTypes/Audio";
 import WaveSurfer from 'wavesurfer.js';
@@ -6,6 +6,8 @@ import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 import { AudioEffect } from "../../gameTypes/AudioEffects";
 import AudioEffectMenu from "../AudioEffectMenu";
 import { Tone } from "../../gameData/assetManager";
+
+const EMITTER_REGION_COLOR = 'rgba(40, 110, 200, 0.45)';
 
 export default function AudioModal({ context, closeModal }) {
     const editorState = useContext(EditorContext);
@@ -18,6 +20,7 @@ export default function AudioModal({ context, closeModal }) {
     const regionsRef = useRef(null);
     const trimRegionRef = useRef(null);
     const loopPointRef = useRef(null);
+    const emitterRegionsRef = useRef([]);
     const effectNodesRef = useRef([]);
 
     const playPauseBtn = useRef(null);
@@ -25,6 +28,14 @@ export default function AudioModal({ context, closeModal }) {
     let existingAudio = null;
     if (context.level === 'song') {
         existingAudio = editorState.songs.find(s => s.id === editorState.selectedSong).audio;
+    }
+
+    if (context.level === 'sound') {
+        const room = editorState.rooms.find(r => r.id === context.roomId);
+        const interactable = room.interactables.find(i => i.id === context.interactableId);
+        const field = interactable[context.field];
+
+        existingAudio = field.audio;
     }
 
     const [wavesurferReady, setWavesurferReady] = useState(false);
@@ -40,13 +51,22 @@ export default function AudioModal({ context, closeModal }) {
     const [loop, setLoop] = useState(existingAudio?.loop ?? false);
     const [loopPoint, setLoopPoint] = useState(existingAudio?.loopPoint ?? 0);
 
+    const [emitter, setEmitter] = useState(existingAudio?.emitter ?? false);
+    const [emitterRegions, setEmitterRegions] = useState(existingAudio?.emitterRegions ?? []);
+    const [emitterInterval, setEmitterInterval] = useState(existingAudio?.emitterInterval ?? 5);
+    const [emitterSkipChance, setEmitterSkipChance] = useState(existingAudio?.emitterSkipChance ?? 0);
+    const [emitterPlaying, setEmitterPlaying] = useState(false);
 
     const [effects, setEffects] = useState([]);
 
     const handleKeyDown = (event) => {
         switch (event.key) {
             case ' ': {
-                wavesurferRef.current.playPause();
+                if (emitterRef.current) {
+                    playPauseBtn.current?.click();
+                } else {
+                    wavesurferRef.current.playPause();
+                }
                 break;
             }
         }
@@ -55,6 +75,7 @@ export default function AudioModal({ context, closeModal }) {
     const hasTrimRef = useRef(hasTrim);
     const loopRef = useRef(loop);
     const playingRef = useRef(playing);
+    const emitterRef = useRef(emitter);
 
     const audio = new GameAudio();
     audio.url = context.url;
@@ -73,6 +94,14 @@ export default function AudioModal({ context, closeModal }) {
         audio.loopPoint = loopPoint;
     }
 
+    audio.emitter = emitter;
+
+    if (emitter) {
+        audio.emitterRegions = emitterRegions;
+        audio.emitterInterval = parseFloat(emitterInterval) || 0;
+        audio.emitterSkipChance = parseFloat(emitterSkipChance) || 0;
+    }
+
     audio.effects = effects.map(eff => ({
         type: eff.type,
         params: eff.params,
@@ -80,6 +109,38 @@ export default function AudioModal({ context, closeModal }) {
         rooms: eff.rooms ?? []
     }));
 
+    const syncEmitterRegions = () => {
+        setEmitterRegions(
+            emitterRegionsRef.current
+                .map(r => ({ start: r.start, end: r.end }))
+                .sort((a, b) => a.start - b.start)
+        );
+    }
+
+    const playRandomEmitterRegion = useCallback(() => {
+        const regions = emitterRegionsRef.current;
+        if (!wavesurferRef.current || regions.length === 0) return;
+
+        const skipChance = parseFloat(emitterSkipChance) || 0;
+        if (Math.random() * 100 < skipChance) return;
+
+        const region = regions[Math.floor(Math.random() * regions.length)];
+        region.play(true);
+    }, [emitterSkipChance]);
+
+    const toggleEmitterPreview = async () => {
+        if (emitterPlaying) {
+            wavesurferRef.current?.pause();
+            setEmitterPlaying(false);
+            return;
+        }
+
+        await Tone().start();
+        wavesurferRef.current.setPlaybackRate(speed, false);
+
+        setEmitterPlaying(true);
+        playRandomEmitterRegion();
+    }
 
     useEffect(() => {
         hasTrimRef.current = hasTrim;
@@ -92,6 +153,10 @@ export default function AudioModal({ context, closeModal }) {
     useEffect(() => {
         playingRef.current = playing;
     }, [playing]);
+
+    useEffect(() => {
+        emitterRef.current = emitter;
+    }, [emitter]);
 
     useEffect(() => {
 
@@ -160,7 +225,45 @@ export default function AudioModal({ context, closeModal }) {
                 if (region === loopPointRef.current) {
                     setLoopPoint(region.start);
                 }
+
+                if (emitterRegionsRef.current.includes(region)) {
+                    syncEmitterRegions();
+                }
             }));
+
+            eventDestructors.push(regions.on('region-created', (region) => {
+                if (region.color !== EMITTER_REGION_COLOR) return;
+                if (emitterRegionsRef.current.includes(region)) return;
+
+                emitterRegionsRef.current.push(region);
+                syncEmitterRegions();
+            }));
+
+            eventDestructors.push(regions.on('region-removed', (region) => {
+                if (!emitterRegionsRef.current.includes(region)) return;
+
+                emitterRegionsRef.current = emitterRegionsRef.current.filter(r => r !== region);
+                syncEmitterRegions();
+            }));
+
+            eventDestructors.push(regions.on('region-double-clicked', (region, event) => {
+                if (!emitterRegionsRef.current.includes(region)) return;
+
+                event.stopPropagation();
+                region.remove();
+            }));
+
+            if (existingAudio?.emitter) {
+                (existingAudio.emitterRegions ?? []).forEach(r => {
+                    regions.addRegion({
+                        start: r.start,
+                        end: r.end,
+                        color: EMITTER_REGION_COLOR,
+                        drag: true,
+                        resize: true,
+                    });
+                });
+            }
 
             regionsRef.current = regions;
 
@@ -213,6 +316,7 @@ export default function AudioModal({ context, closeModal }) {
 
             wavesurferRef.current = null;
             regionsRef.current = null;
+            emitterRegionsRef.current = [];
 
             window.removeEventListener('keydown', handleKeyDown);
             playPauseBtn.current?.removeEventListener('keydown', stopSpace);
@@ -253,6 +357,84 @@ export default function AudioModal({ context, closeModal }) {
 
     }, [wavesurferReady, effects]);
 
+    useEffect(() => {
+        if (!wavesurferReady || !emitter) return;
+
+        const wavesurfer = wavesurferRef.current;
+        wavesurfer.setOptions({ dragToSeek: false });
+
+        const disableDragSelection = regionsRef.current.enableDragSelection({
+            color: EMITTER_REGION_COLOR,
+            drag: true,
+            resize: true,
+        });
+
+        return () => {
+            disableDragSelection();
+            wavesurferRef.current?.setOptions({ dragToSeek: true });
+        }
+    }, [wavesurferReady, emitter]);
+
+    useEffect(() => {
+        if (!emitterPlaying) return;
+
+        const intervalSeconds = parseFloat(emitterInterval);
+        if (isNaN(intervalSeconds) || intervalSeconds <= 0) return;
+
+        const timer = setInterval(playRandomEmitterRegion, intervalSeconds * 1000);
+
+        return () => clearInterval(timer);
+    }, [emitterPlaying, emitterInterval, playRandomEmitterRegion]);
+
+    const toggleEmitter = () => {
+        if (!emitter) {
+            setEmitter(true);
+            trimRegionRef.current.remove();
+            trimRegionRef.current = null;
+            setHasTrim(false);
+        } else {
+            wavesurferRef.current?.pause();
+            setEmitterPlaying(false);
+
+            emitterRegionsRef.current.slice().forEach(r => r.remove());
+            emitterRegionsRef.current = [];
+            setEmitterRegions([]);
+            setEmitter(false);
+        }
+    }
+
+    const clearEmitterRegions = () => {
+        emitterRegionsRef.current.slice().forEach(r => r.remove());
+        emitterRegionsRef.current = [];
+        setEmitterRegions([]);
+    }
+
+    const handleEmitterIntervalChange = (event) => {
+        let val = event.target.value;
+        if (val < 0) {
+            val = 0;
+        }
+
+        if (val > 600) {
+            val = 600;
+        }
+
+        setEmitterInterval(val);
+    }
+
+    const handleEmitterSkipChanceChange = (event) => {
+        let val = event.target.value;
+        if (val < 0) {
+            val = 0;
+        }
+
+        if (val > 100) {
+            val = 100;
+        }
+
+        setEmitterSkipChance(val);
+    }
+
     const addTrimRegion = () => {
         if (!hasTrim) {
             trimRegionRef.current = regionsRef.current.addRegion({
@@ -289,6 +471,11 @@ export default function AudioModal({ context, closeModal }) {
     }
 
     const playBtn = async () => {
+        if (emitter) {
+            await toggleEmitterPreview();
+            return;
+        }
+
         await Tone().start();
 
         wavesurferRef.current.setPlaybackRate(speed, false);
@@ -360,6 +547,11 @@ export default function AudioModal({ context, closeModal }) {
         setSpeed(event.target.value);
     }
 
+    const resetEffects = () => {
+        effects.forEach(eff => eff.nodes.forEach(n => n.dispose()));
+        setEffects([]);
+    }
+
     const handleAddEffect = (event) => {
         setEffects([...effects, new AudioEffect()]);
     }
@@ -397,28 +589,68 @@ export default function AudioModal({ context, closeModal }) {
         setEffects([...tempEffects]);
     }
 
+    const isPlaying = (emitter ? emitterPlaying : playing);
+
     return  (
-        <div className="editor-modal anim-modal">
+        <div className="editor-modal tall-modal">
             <div className="modal-body">
                 <div id="waveform"></div>
                 <div className="btn-row">
                     <div onClick={seekStart} className="div-btn audio-btn">⏮</div>
                     <div 
                         ref={playPauseBtn} 
-                        className={'div-btn audio-btn' + (playing ? ' active-btn' : '')} 
+                        className={'div-btn audio-btn' + (isPlaying ? ' active-btn' : '')}
                         onClick={playBtn}
                     >
-                        {playing ? '⏸' : '►'}
+                        {isPlaying ? '⏸' : '►'}
                     </div>
                     <div onClick={seekEnd} className="div-btn audio-btn">⏭</div>
-                    <button onClick={addTrimRegion} className={hasTrim ? 'active-btn' : ''}>Trim</button>
-                    <button onClick={addLoopPoint} className={loop ? 'active-btn' : ''}>Loop</button>
+                    <button onClick={addTrimRegion} className={hasTrim ? 'active-btn' : ''} disabled={emitter}>Trim</button>
+                    <button onClick={addLoopPoint} className={loop ? 'active-btn' : ''} disabled={emitter}>Loop</button>
+                    <button
+                        onClick={toggleEmitter}
+                        className={emitter ? 'active-btn' : ''}
+                    >
+                        Emitter Mode
+                    </button>
                 </div>
+                {emitter &&
+                    <div className="emitter-row">
+                        <div className="emitter-field">
+                            <label className="modal-field-label" htmlFor="emitter-interval">Interval (seconds)</label>
+                            <input
+                                type="number"
+                                id="emitter-interval"
+                                min={0.1}
+                                max={600}
+                                step={0.1}
+                                value={emitterInterval}
+                                onChange={handleEmitterIntervalChange}
+                            />
+                        </div>
+                        <div className="emitter-field">
+                            <label className="modal-field-label" htmlFor="emitter-skip">% Chance to Skip</label>
+                            <input
+                                type="number"
+                                id="emitter-skip"
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={emitterSkipChance}
+                                onChange={handleEmitterSkipChanceChange}
+                            />
+                        </div>
+                        <button onClick={clearEmitterRegions} disabled={emitterRegions.length === 0}>Clear Regions</button>
+                    </div>
+                }
                 <div className="audio-row">
                     <div className="audio-effect-container">
                         <div className="modal-field-label effect-title">
                             Effects
-                            <button className="action-btn" onClick={handleAddEffect}>New Effect</button>
+                            <div className="modal-footer">
+                                <button>Reset</button>
+                                <button className="action-btn" onClick={handleAddEffect}>New Effect</button>
+                            </div>
                         </div>
                         <div className="effect-section">
                             <div className="effects-scroll">

@@ -29,7 +29,7 @@ export class AudioEffect {
     paramOptions = {};
     context;
     nodes = [];
-    condition = '';
+    condition = 'always';
     rooms = [];
 
     handleParamChange = (param, value) => {

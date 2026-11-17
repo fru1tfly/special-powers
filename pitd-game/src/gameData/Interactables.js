@@ -38,6 +38,17 @@ export const interactableFormValues = {
             visible: 'isLocked',
             type: 'dropdown',
             options: 'keys'
+        },
+
+        openSound: {
+            name: 'Open Sound',
+            type: 'sound'
+        },
+
+        lockedSound: {
+            name: 'Locked Sound',
+            type: 'sound',
+            visible: 'isLocked'
         }
     },
     MovePoint: {
@@ -73,6 +84,11 @@ export const interactableFormValues = {
             type: 'fade',
             visibleFunc: (val) => val === 'fade',
             visible: 'transitionType'
+        },
+
+        moveSound: {
+            name: 'Move Sound',
+            type: 'sound'
         }
     },
     Key: {
@@ -81,6 +97,11 @@ export const interactableFormValues = {
         sprite: {
             name: 'Sprite',
             type: 'photo'
+        },
+
+        pickupSound: {
+            name: 'Pickup Sound',
+            type: 'sound'
         }
     },
     Art: {
@@ -89,8 +110,23 @@ export const interactableFormValues = {
         closeUp: {
             name: 'Close Up',
             type: 'photo'
+        },
+
+        viewSound: {
+            name: 'View Sound',
+            type: 'sound'
         }
     },
+
+    AudioPlayer: {
+        hasArea: true,
+        hasPosition: false,
+        audio: {
+            name: 'Audio',
+            type: 'sound'
+        }
+    },
+
     AnimatedObject: {
         hasArea: false,
         hasPosition: true,

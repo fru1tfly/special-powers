@@ -1,6 +1,7 @@
 import { useContext, useRef, useState, useEffect } from "react";
 import { EditorContext, SetEditorContext } from "../EditorContext";
 import AudioModal from "./AudioModal";
+import AudioPreview from "../AudioPreview";
 import { GameAudio } from "../../gameTypes/Audio";
 import { addAudio } from "../../gameData/assetManager";
 import { useUploadFile } from "../../hooks/files/useUploadFile";
@@ -14,42 +15,39 @@ export default function SongModal({ song, closeModal }) {
 
     const { uploadFile } = useUploadFile();
 
-    useEffect(() => {
-        if (existingSong.audio) setAudio(existingSong.audio);
-        if (existingSong.name) setName(existingSong.name);
-        if (existingSong.rooms) setSongRooms(existingSong.rooms);
-        if (existingSong.startCondition) setStartCondition(existingSong.startCondition);
-        if (existingSong.behavior) setBehavior(existingSong.behavior);
-        if (existingSong.fadeInTime) setFadeInTime(existingSong.fadeInTime);
-        if (existingSong.fadeOutTime) setFadeOutTime(existingSong.fadeOutTime);
-        if (existingSong.reduction) setReduction(existingSong.reduction);
-    }, [song]);
-
-    const [audio, setAudio] = useState({...existingSong.audio} ?? new GameAudio());
+    const [audio, setAudio] = useState(existingSong.audio ? {...existingSong.audio} : new GameAudio());
     const [name, setName] = useState(existingSong.name ?? 'New Song');
-    const [songRooms, setSongRooms] = useState(existingSong.rooms ?? []);
-    const [startCondition, setStartCondition] = useState(existingSong.startCondition ?? 'room');
-    const [behavior, setBehavior] = useState(existingSong.behavior ?? 'overlap');
+    
     const [fadeInTime, setFadeInTime] = useState(existingSong.fadeInTime ?? 0);
     const [fadeOutTime, setFadeOutTime] = useState(existingSong.fadeOutTime ?? 0);
+
+    const [behavior, setBehavior] = useState(existingSong.behavior ?? 'overlap');
     const [reduction, setReduction] = useState(existingSong.reduction ?? 0);
 
+    const [songRooms, setSongRooms] = useState(existingSong.rooms ?? []);
+
     const [audioMode, setAudioMode] = useState(false);
+
+    // Re-sync local state when a different song is opened
+    useEffect(() => {
+        setAudio(existingSong.audio ? {...existingSong.audio} : new GameAudio());
+        setName(existingSong.name ?? 'New Song');
+        setSongRooms(existingSong.rooms ?? []);
+        setBehavior(existingSong.behavior ?? 'overlap');
+        setFadeInTime(existingSong.fadeInTime ?? 0);
+        setFadeOutTime(existingSong.fadeOutTime ?? 0);
+        setReduction(existingSong.reduction ?? 0);
+    }, [song]);
 
 
     const handleNameChange = (event) => {
         setName(event.target.value);
-        updateSong();
-    }
-
-    const handleConditionChange = (event) => {
-        setStartCondition(event.target.value);
-        updateSong();
+        updateSong({ name: event.target.value });
     }
 
     const handleBehaviorChange = (event) => {
         setBehavior(event.target.value);
-        updateSong();
+        updateSong({ behavior: event.target.value });
     }
 
     const handleReductionChange = (event) => {
@@ -62,7 +60,7 @@ export default function SongModal({ song, closeModal }) {
             val = 99;
         }
         setReduction(val);
-        updateSong();
+        updateSong({ reduction: val });
     }
 
     const handleFadeInTimeChange = (event) => {
@@ -76,7 +74,7 @@ export default function SongModal({ song, closeModal }) {
         }
 
         setFadeInTime(val);
-        updateSong();
+        updateSong({ fadeInTime: val });
     }
 
     const handleFadeOutTimeChange = (event) => {
@@ -90,7 +88,7 @@ export default function SongModal({ song, closeModal }) {
         }
 
         setFadeOutTime(val);
-        updateSong();
+        updateSong({ fadeOutTime: val });
     }
 
     const handleEditAudio = () => {
@@ -112,32 +110,26 @@ export default function SongModal({ song, closeModal }) {
             setAudio(newAudio)
             await addAudio(newAudio);
 
-            updateSong();
+            updateSong({ audio: newAudio });
         })
     }
 
 
-    const updateSong = (updatedField, updatedValue) => {
+    const updateSong = (overrides = {}) => {
         setEditorState({
             ...editorState,
-            songs: editorState.songs.map(s => {
-                if (s.id === existingSong.id) {
-                    if (updatedField && updatedValue) {
-                        s[updatedField] = updatedValue;
-                    } else {
-                        s.name = name;
-                        s.audio = audio;
-                        s.rooms = [...songRooms];
-                        s.behavior = behavior;
-                        s.reduction = reduction;
-                        s.fadeInTime = fadeInTime;
-                        s.fadeOutTime = fadeOutTime;
-                    }
-                }
-
-                return {...s};
+            songs: editorState.songs.map(s => s.id !== existingSong.id ? s : {
+                ...s,
+                name,
+                audio,
+                rooms: [...songRooms],
+                behavior,
+                reduction,
+                fadeInTime,
+                fadeOutTime,
+                ...overrides
             })
-        })
+        });
     }
 
     const saveSong = () => {
@@ -160,11 +152,12 @@ export default function SongModal({ song, closeModal }) {
             }}
             closeModal={(newAudio) => {
                 setAudio(newAudio);
+                updateSong({ audio: newAudio });
                 setAudioMode(false);
             }}
         />
     ) : (
-        <div className="editor-modal anim-modal">
+        <div className="editor-modal tall-modal">
             <div className="modal-body">
                 <div className="modal-section">
                     <div className="modal-field">
@@ -175,7 +168,7 @@ export default function SongModal({ song, closeModal }) {
                         <div className="modal-field-label">Audio</div>
                         {hasAudio && 
                             <>
-                                <audio controls src={`${import.meta.env.VITE_DOMAIN}/${audio.url}`} />
+                                <AudioPreview audio={audio} />
                                 <button onClick={() => handleEditAudio()}>Edit Audio</button>
                             </>
                         }
@@ -189,19 +182,19 @@ export default function SongModal({ song, closeModal }) {
                 </div>
                 <div className="modal-section">
                     <div className="modal-field">
-                        <div className="modal-field-label">Start Condition</div>
-                        <select value={startCondition} onChange={handleConditionChange}>
-                            <option value="room">In Room(s)</option>
-                            <option value="off">Interactable</option>
-                        </select>
-                    </div>
-                    <div className="modal-field">
                         <div className="modal-field-label">Play Behavior</div>
                         <select value={behavior} onChange={handleBehaviorChange}>
                             <option value="overlap">Play On Top</option>
                             <option value="replace">Replace</option>
                         </select>
                     </div>
+
+                    {behavior === 'overlap' && 
+                        <div className="modal-field">
+                            <div className="modal-field-label">% to Reduce Existing Audio</div>
+                            <input type="number" min={0} max={99} step={1} onInput={handleReductionChange} value={reduction}/>
+                        </div>
+                    }
                 </div>
                 <div className="modal-section">
                     <div className="modal-field">
@@ -212,18 +205,15 @@ export default function SongModal({ song, closeModal }) {
                         <div className="modal-field-label">Fade Out Time (in seconds)</div>
                         <input type="number" min={0} max={10} onInput={handleFadeOutTimeChange} value={fadeOutTime}/>
                     </div>
-                    {behavior === 'overlap' && 
-                        <div className="modal-field">
-                            <div className="modal-field-label">% to Reduce Existing Audio</div>
-                            <input type="number" min={0} max={99} step={1} onInput={handleReductionChange} value={reduction}/>
-                        </div>
-                    }
                 </div>
                 <div className="modal-field">
                     <Multipicker
                         list={songRooms}
                         source={rooms}
-                        setList={(newList) => { setSongRooms(newList)}}
+                        setList={(newList) => {
+                            setSongRooms(newList);
+                            updateSong({ rooms: [...newList] });
+                        }}
                         title='Rooms'
                     />
                     

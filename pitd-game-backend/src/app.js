@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import http from 'http';
 import cors from 'cors';
-import fs from 'fs';
+import fs from 'fs/promises';
 import { upload } from '../middlewares/upload.js';
 import dotenv from 'dotenv';
 
@@ -15,8 +15,6 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
-
-let gameData;
 
 const app = express();
 const server = http.createServer(app);
@@ -36,17 +34,65 @@ fileRouter.post(
     }
 );
 
-fs.readFile(
-    process.env.GAME_DATA_FILE, 
-    (err, data) => {
-        if (err) throw err;
-        gameData = JSON.parse(data);
+const gameDataString = await fs.readFile(process.env.GAME_DATA_FILE, 'utf8');
+let gameData = JSON.parse(gameDataString);
+
+fileRouter.get(
+    '/assets',
+    async (req, res) => {
+        const entries = await fs.readdir(process.env.PUBLIC_FOLDER, { 
+            recursive: true,
+            withFileTypes: true
+        });
+
+        const entriesWithStats = await Promise.all(
+            entries.map(async (dirent) => {
+                const fullPath = path.join(dirent.parentPath, dirent.name);
+                const stats = await fs.stat(fullPath);
+                
+                return { 
+                    dirent, 
+                    birthtime: stats.birthtimeMs 
+                };
+            })
+        );
+
+        res.status(200).json(entriesWithStats
+            .sort((a, b) => b.birthtime - a.birthtime)
+            .map(item => item.dirent));
+    }
+)
+
+fileRouter.post(
+    '/delete',
+    async (req, res) => {
+        const urls = Array.isArray(req.body.urls) ? req.body.urls : [];
+        const publicRoot = path.resolve(process.env.PUBLIC_FOLDER);
+
+        const results = await Promise.all(
+            urls.map(async (url) => {
+                const fullPath = path.resolve(publicRoot, `.${decodeURIComponent(url)}`);
+
+                if (!fullPath.startsWith(publicRoot + path.sep)) {
+                    return { url, deleted: false, error: 'Invalid path' };
+                }
+
+                try {
+                    await fs.unlink(fullPath);
+                    return { url, deleted: true };
+                } catch (err) {
+                    return { url, deleted: false, error: err.code || err.message };
+                }
+            })
+        );
+
+        res.status(200).json({ results });
     }
 );
 
 fileRouter.post(
     '/update/game',
-    (req, res) => {
+    async (req, res) => {
         let newGameData = { ...req.body };
         if (gameData['version']) {
             newGameData.version = gameData['version'] + 1;
@@ -54,22 +100,19 @@ fileRouter.post(
             newGameData.version = 1;
         }
 
-        fs.writeFile(
-            process.env.GAME_DATA_FILE, 
-            JSON.stringify(newGameData), 
-            (err) => {
-                if (err) throw err;
-                gameData = { ...newGameData };
-                res.send(200);
-            }
-        )
+        await fs.writeFile(
+            process.env.GAME_DATA_FILE,
+            JSON.stringify(newGameData)
+        );
+        gameData = { ...newGameData };
+        res.sendStatus(200);
     }
 )
 
 fileRouter.get(
     '/game',
     (req, res) => {
-        res.send(gameData);
+        res.json(gameData);
     }
 )
 

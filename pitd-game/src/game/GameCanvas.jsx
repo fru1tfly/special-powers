@@ -8,7 +8,7 @@ import { getCenter, showOnScreen } from "../gameData/gameDataHelper";
 import { Animation, Fade } from "../gameTypes/LevelObjects";
 import { hasArea } from "../gameData/Interactables";
 import { cursorImages } from "../gameData/cursors";
-import { addRoomSongs } from "./GameAudioManager";
+import { setRoomSongs } from "./GameAudioManager";
 import * as UI from "./uiHelper";
 
 let canvas;
@@ -280,7 +280,7 @@ export default function GameCanvas() {
         roomName = room.name;
 
         if (!gameStarted) {
-            addRoomSongs(gameState.room, gameState.songs);
+            setRoomSongs(gameState.room, gameState.songs);
             gameStarted = true;
         }
 

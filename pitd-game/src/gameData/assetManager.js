@@ -4,6 +4,9 @@ import { AudioEffect } from "../gameTypes/AudioEffects";
 const IMAGES = {};
 const SONGS = {};
 
+const soundBuffers = {}; // raw Sound Data (kept separate to prevent duplicates)
+const SOUNDS = {}; // references to soundBuffers with unique parameters
+
 let toneReference = null;
 
 export const Tone = () => {
@@ -15,22 +18,33 @@ export const Tone = () => {
 }
 
 export const addImage = (url, prefix = import.meta.env.VITE_DOMAIN, callback = () => {}) => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-	    img.src = `${prefix}${url}`;
-        img.setAttribute('crossOrigin', '');
-        img.onload = () => {
+    if (IMAGES[url]) {
+        return IMAGES[url].promise.then((img) => {
             callback();
+            return img;
+        });
+    }
+
+    const img = new Image();
+    img.setAttribute('crossOrigin', '');
+
+    const promise = new Promise((resolve, reject) => {
+        img.onload = () => {
             resolve(img);
         };
         img.onerror = (e) => {
             console.error(e);
+            delete IMAGES[url];
             reject(img);
-        }
+        };
+    });
 
-        IMAGES[url] = {};
+    IMAGES[url] = { image: img, promise };
+    img.src = `${prefix}${url}`;
 
-        IMAGES[url].image = img;
+    return promise.then((loadedImg) => {
+        callback();
+        return loadedImg;
     });
 }
 
@@ -59,7 +73,12 @@ export const addAudio = (def, prefix = import.meta.env.VITE_DOMAIN, callback = (
 }
 
 // Game Audio
-export const addSong = async (song) => {
+export const addSong = async (song, callback) => {
+    if (SONGS[song.id]) {
+        callback();
+        return;
+    }
+
     const url = `${import.meta.env.VITE_DOMAIN}${song.audio.url}`;
     const res = await fetch(url);
     if (!res.ok) {
@@ -69,6 +88,34 @@ export const addSong = async (song) => {
         arrayBuffer: await res.arrayBuffer(),
         song
     };
+
+    callback();
+}
+
+export const addSound = async (sound, callback) => {
+
+    const url = `${import.meta.env.VITE_DOMAIN}${sound.audio.url}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch ${url}: ${res.status}`);
+    }
+
+    if (!soundBuffers[sound.audio.url]) {
+        soundBuffers[sound.audio.url] = await res.arrayBuffer();
+    }
+
+    SOUNDS[sound.id] = {
+        ...sound
+    };
+
+    callback();
+}
+
+export const getSound = (id) => {
+    if (!SOUNDS[id]) {
+        return null;
+    }
+    return SOUNDS[id];
 }
 
 export const initializeAudio = async () => {
@@ -79,84 +126,59 @@ export const initializeAudio = async () => {
 
         if (!s.arrayBuffer) continue;
 
-        let songLevel = parseInt(song.audio.level);
-        if (isNaN(songLevel)) {
-            songLevel = 100;
-        }
+        const buffer = await decodeToneBuffer(toneReference, s.arrayBuffer);
+        const effects = await initializeEffects(song.audio.effects);
 
-        const audioBuffer = await toneReference.getContext().decodeAudioData(s.arrayBuffer);
-        const player = new toneReference.Player({
-            url: new toneReference.ToneAudioBuffer(audioBuffer),
-            volume: toneReference.gainToDb(songLevel / 100),
-        });
-        player.loop = true;
-        player.playbackRate = song.audio.speed;
-
-        if (song.audio.trimRegion != null) {
-            player.seek(song.audio.trimRegion.start);
-
-            if (song.audio.loop) {
-                player.loopStart = song.audio.loopPoint;
-                player.loopEnd = song.audio.trimRegion.end;
-            }
-        } else {
-            if (song.audio.loop) {
-                player.loopStart = song.audio.loopPoint;
-                player.loopEnd = player.buffer.duration;
-            }
-        }
-
-        player.fadeIn = song.fadeInTime;
-        player.fadeOut = song.fadeOutTime;
-
-        const effects = [];
-
-        for (const effect of song.audio.effects) {
-            const eff = new AudioEffect();
-            eff.params = { ...effect.params };
-            eff.condition = effect.condition;
-            eff.rooms = effect.rooms;
-            eff.setType(effect.type);
-
-            if (effect.type === 'reverb') {
-                await eff.nodes[0].ready;
-            }
-
-            effects.push(eff);
-        }
-
-        const definition = {
-            player: player,
-            song: song,
-            effects: effects
+        SONGS[song.id] = {
+            definition: song,
+            effects: effects,
+            buffer: buffer
         };
-
-        SONGS[song.id] = definition;
-    }
-} 
-
-export const buildEffectChain = async (songId, currentRoom) => {
-    const songDefinition = getSong(songId);
-
-    // Clear previous chain
-    songDefinition.player.output.disconnect();
-    songDefinition.effects.forEach(e => e.nodes.forEach(n => n.disconnect()));
-
-    let previousNode = songDefinition.player.output;
-
-    console.log(songDefinition.effects);
-
-    for (const eff of songDefinition.effects) {
-        if (eff.condition === 'off' || eff.condition === 'room' && !eff.rooms.includes(currentRoom)) continue;
-
-        if (eff.condition)
-        eff.nodes.forEach(node => {
-            toneReference.connect(previousNode, node);
-            previousNode = node;
-        });
     }
 
-    toneReference.connect(previousNode, toneReference.getDestination());
+    for (const sbUrl of Object.keys(soundBuffers)) {
+        const sb = soundBuffers[sbUrl];
+        const buffer = await decodeToneBuffer(toneReference, sb);
+
+        soundBuffers[sbUrl] = buffer;
+    }
+
+    for (const sound of Object.values(SOUNDS)) {
+
+        const buffer = soundBuffers[sound.audio.url];
+        const effects = await initializeEffects(sound.audio.effects);
+
+        SOUNDS[sound.id] = {
+            definition: sound,
+            effects: effects,
+            buffer: buffer
+        }
+    }
+}
+
+const decodeToneBuffer = async (tone, arrayBuffer) => {
+    const audioBuffer = await tone.getContext().decodeAudioData(arrayBuffer);
+    return new tone.ToneAudioBuffer(audioBuffer);
+}
+
+const initializeEffects = async (fxs) => {
+    const effects = [];
+
+    for (const effect of fxs) {
+        const eff = new AudioEffect();
+        eff.params = { ...effect.params };
+        eff.condition = effect.condition;
+        eff.rooms = effect.rooms;
+        eff.setType(effect.type, false);
+
+        if (effect.type === 'reverb') {
+            await eff.nodes[0].ready;
+        }
+
+        effects.push(eff);
+    }
+
+    return effects;
 }
 
 export const getSong = (id) => {

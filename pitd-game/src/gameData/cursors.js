@@ -21,6 +21,7 @@ export const cursors = {
     'upleft': `url("${import.meta.env.BASE_URL}upleft.png") 25 25, auto`,
     'downright': `url("${import.meta.env.BASE_URL}downright.png") 25 25, auto`,
     'downleft': `url("${import.meta.env.BASE_URL}downleft.png") 25 25, auto`,
+    'speaker': `url("${import.meta.env.BASE_URL}speaker.png") 25 25, auto`,
 }; 
 
 Promise.all([
@@ -41,6 +42,7 @@ Promise.all([
     addImage("upleft.png", import.meta.env.BASE_URL),
     addImage("downright.png", import.meta.env.BASE_URL),
     addImage("downleft.png", import.meta.env.BASE_URL),
+    addImage("speaker.png", import.meta.env.BASE_URL)
 ])
 
 export const cursorImages = {
@@ -60,4 +62,5 @@ export const cursorImages = {
     'upleft': 'upleft.png',
     'downright': 'downright.png',
     'downleft': 'downleft.png',
+    'speaker': 'speaker.png'
 };

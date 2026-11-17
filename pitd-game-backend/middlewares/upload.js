@@ -15,7 +15,28 @@ const storage = multer.diskStorage({
         callback(null, uploadPath);
     },
     filename: (req, file, callback) => {
-        // replace filename with current date to prevent duplicates
+        if (req.body.keepName === 'true') {
+
+            const originalName = path.basename(file.originalname);
+            const ext = path.extname(originalName);
+            const base = path.basename(originalName, ext);
+            const uploadPath = path.join(
+                process.env.PUBLIC_FOLDER,
+                decodeURIComponent(req.body.destination)
+            );
+
+            let fileName = originalName;
+            let suffix = 1;
+            while (fs.existsSync(path.join(uploadPath, fileName))) {
+                fileName = `${base}-${suffix}${ext}`;
+                suffix++;
+            }
+
+            callback(null, fileName);
+            return;
+        }
+
+        // replace filename with a UUID to prevent duplicates
         callback(null, uuidv4() + path.extname(file.originalname));
     },
 

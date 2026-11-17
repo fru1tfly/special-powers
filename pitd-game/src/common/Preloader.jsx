@@ -36,7 +36,7 @@ export default function Preloader({ playBtn, setState, children }) {
             }
 
             const songPromises = (data.songs ?? []).filter(song => song.audio && song.audio.url).map(song =>
-                (gameMode ? addSong(song) : addAudio(song.audio))
+                (gameMode ? addSong(song, incrementLoadedCount) : addAudio(song.audio))
                     .then(incrementLoadedCount)
                     .catch(e => console.error('Failed to load song', song.id, e))
             );
